@@ -46,6 +46,7 @@ impl Window {
 
     fn process_events(&mut self) {
         for (_, event) in glfw::flush_messages(&self.events) {
+            println!("{:?}", event);
             match event {
                 glfw::WindowEvent::FramebufferSize(width, height) => unsafe {
                     gl::Viewport(0, 0, width, height)

@@ -1,5 +1,4 @@
-/// # Vertex Array Object
-///
+// Vertex Array Object
 pub struct VAO {
     id: gl::types::GLuint,
 }

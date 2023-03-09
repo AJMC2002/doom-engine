@@ -1,6 +1,13 @@
 use std::{mem, ptr};
 
-use doom_engine::graphics::{window::Window, wrapper};
+use doom_engine::graphics::{
+    window::Window,
+    wrapper::{
+        bo::{BO, VBO},
+        vao::VAO,
+        vertex_attribute::VertexAttribute,
+    },
+};
 
 const WIDTH: u32 = 1080;
 
@@ -17,14 +24,14 @@ fn main() {
 
     window.init_gl();
 
-    let vao = wrapper::vao::VAO::new();
+    let vao = VAO::new();
     vao.bind();
 
-    let vbo = wrapper::vbo::VBO::new(gl::ARRAY_BUFFER, gl::STATIC_DRAW);
+    let vbo: VBO = BO::new(gl::STATIC_DRAW);
     vbo.bind();
-    vbo.store_data(&vertices);
+    vbo.store(&vertices);
 
-    let position_attribute = wrapper::vertex_attribute::VertexAttribute::new(
+    let position_attribute = VertexAttribute::new(
         0,
         3,
         gl::FLOAT,

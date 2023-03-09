@@ -1,4 +1,4 @@
 pub mod vao;
-pub mod vbo;
+pub mod bo;
 pub mod vertex_attribute;
 pub mod shader_program;

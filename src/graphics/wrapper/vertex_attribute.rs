@@ -1,7 +1,6 @@
-use std::ffi::c_void;
+use std::os::raw::c_void;
 
-/// # Vertex Attribute
-/// Discribes vertex data
+// Vertex Attribute
 pub struct VertexAttribute {
     index: gl::types::GLuint,
 }
