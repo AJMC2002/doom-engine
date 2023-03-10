@@ -39,9 +39,9 @@ impl Window {
     }
 
     pub fn update(&mut self) {
-        self.process_events();
         self.window.swap_buffers();
         self.glfw.poll_events();
+        self.process_events();
     }
 
     fn process_events(&mut self) {

@@ -47,7 +47,7 @@ pub struct EBO {
     usage: gl::types::GLenum,
 }
 
-impl BO<u32> for EBO {
+impl BO<i32> for EBO {
     fn new(usage: gl::types::GLenum) -> EBO {
         let mut id = 0;
         unsafe { gl::GenBuffers(1, &mut id) }
@@ -62,12 +62,12 @@ impl BO<u32> for EBO {
         unsafe { gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, 0) }
     }
 
-    fn store(&self, data: &[u32]) {
+    fn store(&self, data: &[i32]) {
         unsafe {
             gl::BufferData(
-                gl::ARRAY_BUFFER,
+                gl::ELEMENT_ARRAY_BUFFER,
                 (data.len() * mem::size_of::<gl::types::GLfloat>()) as gl::types::GLsizeiptr,
-                &data[0] as *const u32 as *const c_void,
+                &data[0] as *const i32 as *const c_void,
                 self.usage,
             )
         }
