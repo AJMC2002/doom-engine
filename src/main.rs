@@ -1,5 +1,7 @@
 use std::{mem, ptr};
 
+use gl::types::*;
+
 use doom_engine::graphics::{
     window::Window,
     wrapper::{
@@ -14,27 +16,11 @@ const WIDTH: u32 = 1080;
 
 const HEIGHT: u32 = 720;
 
-const VERTEX_SHADER_SOURCE: &str = r#"
-    #version 330 core
-    layout (location = 0) in vec3 aPos;
-    void main() {
-       gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
-    }
-"#;
-
-const FRAGMENT_SHADER_SOURCE: &str = r#"
-    #version 330 core
-    out vec4 FragColor;
-    void main() {
-        FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
-    }
-"#;
-
 fn main() {
-    let mut window = Window::new(WIDTH, HEIGHT, "Hello, Window!");
+    let mut window = Window::new(WIDTH, HEIGHT, "Doom Engine");
     window.init_gl();
 
-    let shader_program = ShaderProgram::new(VERTEX_SHADER_SOURCE, FRAGMENT_SHADER_SOURCE);
+    let mut shader_program = ShaderProgram::new("shaders/basic/basic.vs", "shaders/basic/basic.fs");
 
     let vertices = [
         0.5, 0.5, 0.0, // top right
@@ -48,7 +34,7 @@ fn main() {
         1, 2, 3, // second triangle
     ];
 
-    let vao = VAO::new();
+    let vao: VAO = VAO::new();
     let vbo: VBO = BO::new(gl::STATIC_DRAW);
     let ebo: EBO = BO::new(gl::STATIC_DRAW);
 
@@ -65,7 +51,7 @@ fn main() {
         3,
         gl::FLOAT,
         gl::FALSE,
-        3 * mem::size_of::<gl::types::GLfloat>() as gl::types::GLsizei,
+        3 * mem::size_of::<GLfloat>() as GLsizei,
         ptr::null(),
     );
     vertex_attribute.enable();
@@ -73,15 +59,22 @@ fn main() {
     vbo.unbind();
     vao.unbind();
 
+    // unsafe { gl::PolygonMode(gl::FRONT_AND_BACK, gl::LINE) }
+
     while !window.should_close() {
         unsafe {
-            gl::ClearColor(0.5, 0.2, 0.2, 1.0);
+            gl::ClearColor(0.0, 0.0, 0.0, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT);
 
+            let t = window.get_time() as f32;
+            let color = (t.sin() / 2.0) + 0.5;
+
             shader_program.bind();
+            shader_program.create_uniform("globalColor", 1.0-color, color, 0.0, 1.0);
             vao.bind();
-            gl::DrawElements(gl::TRIANGLES, 6, gl::UNSIGNED_INT, ptr::null())
+            gl::DrawElements(gl::TRIANGLES, 6, gl::UNSIGNED_INT, ptr::null());
+
+            window.update();
         }
-        window.update();
     }
 }

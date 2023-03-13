@@ -1,8 +1,10 @@
 use std::{mem, os::raw::c_void};
 
+use gl::types::*;
+
 // Buffer Object
 pub trait BO<DataType> {
-    fn new(usage: gl::types::GLenum) -> Self;
+    fn new(usage: GLenum) -> Self;
     fn bind(&self);
     fn unbind(&self);
     fn store(&self, data: &[DataType]);
@@ -10,12 +12,12 @@ pub trait BO<DataType> {
 
 // Vertex Buffer Object
 pub struct VBO {
-    id: gl::types::GLuint,
-    usage: gl::types::GLenum,
+    id: GLuint,
+    usage: GLenum,
 }
 
 impl BO<f32> for VBO {
-    fn new(usage: gl::types::GLenum) -> VBO {
+    fn new(usage: GLenum) -> VBO {
         let mut id = 0;
         unsafe { gl::GenBuffers(1, &mut id) }
         VBO { id, usage }
@@ -33,7 +35,7 @@ impl BO<f32> for VBO {
         unsafe {
             gl::BufferData(
                 gl::ARRAY_BUFFER,
-                (data.len() * mem::size_of::<gl::types::GLfloat>()) as gl::types::GLsizeiptr,
+                (data.len() * mem::size_of::<GLfloat>()) as GLsizeiptr,
                 &data[0] as *const f32 as *const c_void,
                 self.usage,
             )
@@ -43,12 +45,12 @@ impl BO<f32> for VBO {
 
 // Element Buffer Object
 pub struct EBO {
-    id: gl::types::GLuint,
-    usage: gl::types::GLenum,
+    id: GLuint,
+    usage: GLenum,
 }
 
 impl BO<i32> for EBO {
-    fn new(usage: gl::types::GLenum) -> EBO {
+    fn new(usage: GLenum) -> EBO {
         let mut id = 0;
         unsafe { gl::GenBuffers(1, &mut id) }
         EBO { id, usage }
@@ -66,7 +68,7 @@ impl BO<i32> for EBO {
         unsafe {
             gl::BufferData(
                 gl::ELEMENT_ARRAY_BUFFER,
-                (data.len() * mem::size_of::<gl::types::GLfloat>()) as gl::types::GLsizeiptr,
+                (data.len() * mem::size_of::<GLfloat>()) as GLsizeiptr,
                 &data[0] as *const i32 as *const c_void,
                 self.usage,
             )
