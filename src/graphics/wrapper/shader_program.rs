@@ -2,10 +2,8 @@ use std::{collections::HashMap, ffi::CString, fs::File, io::Read, ptr};
 
 use gl::types::*;
 
-// use cgmath::Matrix;
-
 pub struct ShaderProgram {
-    id: u32,
+    id: GLuint,
     uniform_ids: HashMap<String, GLint>,
 }
 

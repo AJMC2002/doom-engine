@@ -3,11 +3,11 @@ use std::os::raw::c_void;
 use gl::types::*;
 
 // Vertex Attribute
-pub struct VertexAttribute {
+pub struct VertexAttrib {
     index: GLuint,
 }
 
-impl VertexAttribute {
+impl VertexAttrib {
     pub fn new(
         index: u32,
         size: i32,
@@ -15,10 +15,10 @@ impl VertexAttribute {
         normalized: GLboolean,
         stride: GLsizei,
         pointer: *const c_void,
-    ) -> VertexAttribute {
+    ) -> VertexAttrib {
         unsafe { gl::VertexAttribPointer(index, size, type_, normalized, stride, pointer) }
 
-        VertexAttribute { index }
+        VertexAttrib { index }
     }
 
     pub fn enable(&self) {

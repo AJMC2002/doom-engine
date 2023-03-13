@@ -1,6 +1,8 @@
+use gl::types::*;
+
 // Vertex Array Object
 pub struct VAO {
-    id: gl::types::GLuint,
+    id: GLuint,
 }
 
 impl VAO {
