@@ -7,7 +7,7 @@ use doom_engine::graphics::{
     wrapper::{
         bo::{BO, EBO, VBO},
         shader_program::ShaderProgram,
-        texture::Texture,
+        texture::Texture2D,
         vao::VAO,
         vertex_attrib::VertexAttrib,
     },
@@ -26,22 +26,19 @@ fn main() {
         "resources/shaders/basic/basic.fs",
     );
 
-    let texture: Texture = Texture::new();
-    texture.bind();
-    texture.set_params();
-    texture.load_img("resources/textures/pog.jpg");
+    let texture: Texture2D = Texture2D::new("resources/textures/pog.jpg");
 
     let vertices = [
-        // pos [3], colors [3], tex coords [2]
-        -1.0, -1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, // top right
-        1.0, -1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, // bottom right
-        -1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, // bottom left
-        1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, // top left
+        // positions [3] // tex [2]
+        0.7, 0.3, 0.0, 1.0, 1.0, // top right
+        0.3, -0.4, 0.0, 0.5, 0.0, // bottom right
+        -0.3, -0.4, 0.0, 1.0, 1.0, // bottom left
+        -0.5, 0.5, 0.0, 0.4, 1.0, // top left
     ];
 
     let indices = [
-        0, 1, 3, // first triangle
-        0, 2, 3, // second triangle
+        0, 1, 3, // first Triangle
+        1, 2, 3, // second Triangle
     ];
 
     let vao: VAO = VAO::new();
@@ -56,28 +53,19 @@ fn main() {
     ebo.bind();
     ebo.store(&indices);
 
-    let stride = 8 * mem::size_of::<GLfloat>() as GLsizei;
+    let stride = 5 * mem::size_of::<GLfloat>() as GLsizei;
 
     let pos_attrib = VertexAttrib::new(0, 3, gl::FLOAT, gl::FALSE, stride, ptr::null());
-    let color_attrib = VertexAttrib::new(
+    let tex_attrib = VertexAttrib::new(
         1,
-        3,
+        2,
         gl::FLOAT,
         gl::FALSE,
         stride,
         (3 * mem::size_of::<GLfloat>()) as *const c_void,
     );
-    let tex_attrib = VertexAttrib::new(
-        2,
-        2,
-        gl::FLOAT,
-        gl::FALSE,
-        stride,
-        (6 * mem::size_of::<GLfloat>()) as *const c_void,
-    );
 
     pos_attrib.enable();
-    color_attrib.enable();
     tex_attrib.enable();
 
     vbo.unbind();
@@ -92,11 +80,11 @@ fn main() {
             gl::ClearColor(0.0, 0.0, 0.0, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT);
 
-            // let t = window.get_time() as f32;
-            // let color = (t.sin() / 2.0) + 0.5;
+            let t = window.get_time() as f32;
+            let color = (t.sin() / 2.0) + 0.5;
             shader_program.bind();
-            // shader_program.create_uniform("globalColor", 1.0 - color, color, 0.0, 1.0);
-            texture.bind();
+            shader_program.create_4f_uniform("globalColor", 1.0 - color, color, 0.0, 1.0);
+            shader_program.create_2dtex_uniform("myTex", &texture);
             vao.bind();
 
             gl::DrawElements(gl::TRIANGLES, 6, gl::UNSIGNED_INT, ptr::null());

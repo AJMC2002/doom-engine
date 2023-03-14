@@ -2,6 +2,8 @@ use std::{collections::HashMap, ffi::CString, fs::File, io::Read, ptr};
 
 use gl::types::*;
 
+use super::texture::Texture2D;
+
 pub struct ShaderProgram {
     id: GLuint,
     uniform_ids: HashMap<String, GLint>,
@@ -61,7 +63,7 @@ impl ShaderProgram {
         }
     }
 
-    pub fn create_uniform(&mut self, uniform_name: &str, v0: f32, v1: f32, v2: f32, v3: f32) {
+    pub fn create_4f_uniform(&mut self, uniform_name: &str, v0: f32, v1: f32, v2: f32, v3: f32) {
         let uniform_name_cstring = CString::new(uniform_name).unwrap();
         let uniform_location =
             unsafe { gl::GetUniformLocation(self.id, uniform_name_cstring.as_ptr()) };
@@ -73,6 +75,23 @@ impl ShaderProgram {
         }
 
         unsafe { gl::Uniform4f(uniform_location, v0, v1, v2, v3) }
+    }
+
+    pub fn create_2dtex_uniform(&mut self, uniform_name: &str, tex: &Texture2D) {
+        let uniform_name_cstring = CString::new(uniform_name).unwrap();
+        let uniform_location =
+            unsafe { gl::GetUniformLocation(self.id, uniform_name_cstring.as_ptr()) };
+        if uniform_location < 0 {
+            panic!("Cannot locate uniform: {}", uniform_name);
+        } else {
+            self.uniform_ids
+                .insert(uniform_name.to_string(), uniform_location);
+        }
+
+        unsafe {
+            tex.bind();
+            gl::ActiveTexture(gl::TEXTURE0);
+        }
     }
 
     // pub fn set_matrix4fv_uniform(&self, uniform_name: &str, matrix: &cgmath::Matrix4<f32>) {

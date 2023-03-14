@@ -1,4 +1,4 @@
-use std::{mem, os::raw::c_void};
+use std::mem;
 
 use gl::types::*;
 
@@ -36,7 +36,7 @@ impl BO<f32> for VBO {
             gl::BufferData(
                 gl::ARRAY_BUFFER,
                 (data.len() * mem::size_of::<GLfloat>()) as GLsizeiptr,
-                &data[0] as *const f32 as *const c_void,
+                data.as_ptr() as *const GLvoid,
                 self.usage,
             )
         }
@@ -69,7 +69,7 @@ impl BO<i32> for EBO {
             gl::BufferData(
                 gl::ELEMENT_ARRAY_BUFFER,
                 (data.len() * mem::size_of::<GLfloat>()) as GLsizeiptr,
-                &data[0] as *const i32 as *const c_void,
+                data.as_ptr() as *const GLvoid,
                 self.usage,
             )
         }
