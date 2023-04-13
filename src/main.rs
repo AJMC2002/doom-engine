@@ -2,20 +2,21 @@ use std::{mem, os::raw::c_void, ptr};
 
 use gl::types::*;
 
-use doom_engine::graphics::{
-    window::Window,
-    wrapper::{
-        bo::{BO, EBO, VBO},
-        shader_program::ShaderProgram,
-        texture::Texture2D,
-        vao::VAO,
-        vertex_attrib::VertexAttrib,
-    },
+use doom_engine::{
+    graphics::{window::Window, wrapper::*},
+    maths::vector::Vector,
 };
 
-const WIDTH: u32 = 1080;
+static WIDTH: u32 = 1080;
 
-const HEIGHT: u32 = 720;
+static HEIGHT: u32 = 720;
+
+#[test]
+fn vector_sum() {
+    let a = Vector::from_vec(vec![0.5, 0.2, 0.2]);
+    let b = Vector::from_vec(vec![0.5, 0.0, 0.2]);
+    assert_eq!(&a + b, Vector::from_vec(vec![1.0, 0.2, 0.4]));
+}
 
 fn main() {
     let mut window = Window::new(WIDTH, HEIGHT, "Doom Engine");

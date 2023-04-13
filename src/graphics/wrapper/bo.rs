@@ -3,11 +3,11 @@ use std::mem;
 use gl::types::*;
 
 // Buffer Object
-pub trait BO<DataType> {
+pub trait BO<Ty> {
     fn new(usage: GLenum) -> Self;
     fn bind(&self);
     fn unbind(&self);
-    fn store(&self, data: &[DataType]);
+    fn store(&self, data: &[Ty]);
 }
 
 // Vertex Buffer Object
