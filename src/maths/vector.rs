@@ -26,6 +26,40 @@ impl<T> Vector<T> {
     }
 }
 
+// "Scalar" Sum - Just add a scalar to all values
+
+impl<T: Add<Output = T> + Copy> Add<T> for Vector<T> {
+    type Output = Vector<T>;
+
+    fn add(self, scalar: T) -> Vector<T> {
+        Vector::from_iter(self.into_iter().map(|x| x + scalar))
+    }
+}
+
+impl<'a, T: Add<Output = T> + Copy> Add<&'a T> for Vector<T> {
+    type Output = Vector<T>;
+
+    fn add(self, scalar: &'a T) -> Vector<T> {
+        self + *scalar
+    }
+}
+
+impl<'a, T: Add<Output = T> + Copy> Add<T> for &'a Vector<T> {
+    type Output = Vector<T>;
+
+    fn add(self, scalar: T) -> Vector<T> {
+        self.clone() + scalar
+    }
+}
+
+impl<'a, 'b, T: Add<Output = T> + Copy> Add<&'a T> for &'b Vector<T> {
+    type Output = Vector<T>;
+
+    fn add(self, scalar: &'a T) -> Vector<T> {
+        self.clone() + *scalar
+    }
+}
+
 // Vector Sum
 
 impl<T: Add<Output = T> + Copy> Add<Vector<T>> for Vector<T> {

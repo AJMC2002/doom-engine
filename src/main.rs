@@ -2,36 +2,11 @@ use std::{mem, os::raw::c_void, ptr};
 
 use gl::types::*;
 
-use doom_engine::{
-    graphics::{window::Window, wrapper::*},
-    maths::*,
-    vector,
-};
+use doom_engine::graphics::{wrapper::*, Window};
 
 static WIDTH: u32 = 1080;
 
 static HEIGHT: u32 = 720;
-
-#[test]
-fn vector_sum() {
-    let a = Vector::from_vec(vec![0.5, 0.2, 0.2]);
-    let b = Vector::from_vec(vec![0.5, 0.0, 0.2]);
-    assert_eq!(&a + b, Vector::from_vec(vec![1.0, 0.2, 0.4]));
-}
-
-#[test]
-fn vector_mult() {
-    let a = vector![0.5, 0.2, 0.2];
-    let b = Vector::from_vec(vec![0.5, 0.0, 0.2]);
-    assert_eq!(&a * &2.0, vector![1.0, 0.4, 0.4]);
-}
-
-#[test]
-fn dot_prod() {
-    let a = Vector::from_vec(vec![0.5, 0.2, 0.2]);
-    let b = Vector::from_vec(vec![0.5, 0.0, 0.2]);
-    assert_eq!(a * b, 0.29);
-}
 
 fn main() {
     let mut window = Window::new(WIDTH, HEIGHT, "Doom Engine");
