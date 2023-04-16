@@ -17,7 +17,7 @@ fn main() {
         "resources/shaders/basic/basic.fs",
     );
 
-    let texture: Texture2D = Texture2D::new("resources/textures/pog.jpg");
+    let texture: Texture2D = Texture2D::new("resources/textures/cat.jpg");
 
     let vertices = [
         // positions [3] // tex [2]

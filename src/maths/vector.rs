@@ -1,12 +1,15 @@
-use std::iter::Sum;
-use std::ops::Add;
+use cgmath::num_traits::ToPrimitive;
+use std::ops;
+use std::ops::AddAssign;
+use std::ops::DivAssign;
 use std::ops::Index;
 use std::ops::IndexMut;
-use std::ops::Mul;
+use std::ops::MulAssign;
+use std::ops::SubAssign;
 
-#[derive(Clone, PartialEq, Eq, Debug, Default, PartialOrd, Ord)]
-pub struct Vector<T> {
-    data: Vec<T>,
+#[derive(Clone, PartialEq, Debug, Default)]
+pub struct Vector {
+    data: Vec<f32>,
 }
 
 #[macro_export]
@@ -16,179 +19,178 @@ macro_rules! vector {
     };
 }
 
-impl<T> Vector<T> {
+impl Vector {
+    pub fn empty(n: usize) {
+        Vector::from_vec(vec![0.; n]);
+    }
+
+    pub fn new(val: f32, n: usize) {
+        Vector::from_vec(vec![val; n]);
+    }
+
     pub fn len(&self) -> usize {
         self.data.len()
     }
 
-    pub fn from_vec(v: Vec<T>) -> Self {
+    pub fn from_vec(v: Vec<f32>) -> Self {
         Self { data: v }
     }
-}
 
-// "Scalar" Sum - Just add a scalar to all values
+    pub fn abs(&self) -> f32 {
+        self.clone().into_iter().map(|x| x * x).sum::<f32>().sqrt()
+    }
 
-impl<T: Add<Output = T> + Copy> Add<T> for Vector<T> {
-    type Output = Vector<T>;
+    pub fn angle(&self, other: &Vector) -> f32 {
+        (self.unit() * other.unit()).acos()
+    }
 
-    fn add(self, scalar: T) -> Vector<T> {
-        Vector::from_iter(self.into_iter().map(|x| x + scalar))
+    pub fn unit(&self) -> Self {
+        self / self.abs()
+    }
+
+    pub fn cross(&self, other: &Vector) -> Self {
+        assert_eq!(self.len(), 3);
+        assert_eq!(other.len(), 3);
+        Vector::from_vec(vec![
+            self[1] * other[2] + self[2] * other[1],
+            self[2] * other[0] + self[0] * other[2],
+            self[0] * other[1] + self[1] * other[0],
+        ])
     }
 }
 
-impl<'a, T: Add<Output = T> + Copy> Add<&'a T> for Vector<T> {
-    type Output = Vector<T>;
+// Unary Ops
 
-    fn add(self, scalar: &'a T) -> Vector<T> {
-        self + *scalar
+impl_op_ex!(-|vector: &Vector| -> Vector {
+    Vector::from_iter((0..vector.len()).map(|i| -vector[i]))
+});
+
+// Scalar Ops
+
+impl_op_ex_commutative!(+ |vector: &Vector, scalar: &f32| -> Vector {
+    Vector::from_iter((0..vector.len()).map(|i| vector[i] + scalar))
+});
+
+impl_op_ex_commutative!(+ |vector: &Vector, scalar: &i32| -> Vector {
+    Vector::from_iter((0..vector.len()).map(|i| vector[i] + *scalar as f32))
+});
+
+impl_op_ex!(-|vector: &Vector, scalar: &f32| -> Vector { vector + (-scalar) });
+
+impl_op_ex!(-|vector: &Vector, scalar: &i32| -> Vector { vector + (-scalar as f32) });
+
+impl_op_ex!(-|scalar: &f32, vector: &Vector| -> Vector { scalar + (-vector) });
+
+impl_op_ex!(-|scalar: &i32, vector: &Vector| -> Vector { *scalar as f32 + (-vector) });
+
+impl_op_ex_commutative!(*|vector: &Vector, scalar: &f32| -> Vector {
+    Vector::from_iter((0..vector.len()).map(|i| vector[i] * scalar))
+});
+
+impl_op_ex_commutative!(*|vector: &Vector, scalar: &i32| -> Vector {
+    Vector::from_iter((0..vector.len()).map(|i| vector[i] * *scalar as f32))
+});
+
+impl_op_ex!(/ |vector: &Vector, scalar: &f32| -> Vector {
+    Vector::from_iter((0..vector.len()).map(|i| vector[i] / scalar))
+});
+
+impl_op_ex!(/ |vector: &Vector, scalar: &i32| -> Vector {
+    Vector::from_iter((0..vector.len()).map(|i| vector[i] / *scalar as f32))
+});
+
+// Vector Ops
+
+impl_op_ex!(+ |lhs: &Vector, rhs: &Vector| -> Vector {
+    assert_eq!(lhs.len(), rhs.len());
+    Vector::from_iter((0..lhs.len()).map(|i| lhs[i] + rhs[i]))
+});
+
+impl_op_ex!(-|lhs: &Vector, rhs: &Vector| -> Vector { lhs + (-rhs) });
+
+impl_op_ex!(*|lhs: &Vector, rhs: &Vector| -> f32 {
+    assert_eq!(lhs.len(), rhs.len());
+    (0..lhs.len()).map(|i| lhs[i] * rhs[i]).sum()
+});
+
+// Scalar Ops Assignment
+
+impl<T: ToPrimitive> AddAssign<T> for Vector {
+    fn add_assign(&mut self, scalar: T) {
+        let scalar_f32 = scalar.to_f32().unwrap();
+        for i in 0..self.len() {
+            self[i] += scalar_f32;
+        }
     }
 }
 
-impl<'a, T: Add<Output = T> + Copy> Add<T> for &'a Vector<T> {
-    type Output = Vector<T>;
-
-    fn add(self, scalar: T) -> Vector<T> {
-        self.clone() + scalar
+impl<T: ToPrimitive> SubAssign<T> for Vector {
+    fn sub_assign(&mut self, scalar: T) {
+        let scalar_f32 = scalar.to_f32().unwrap();
+        for i in 0..self.len() {
+            self[i] -= scalar_f32;
+        }
     }
 }
 
-impl<'a, 'b, T: Add<Output = T> + Copy> Add<&'a T> for &'b Vector<T> {
-    type Output = Vector<T>;
-
-    fn add(self, scalar: &'a T) -> Vector<T> {
-        self.clone() + *scalar
+impl<T: ToPrimitive> MulAssign<T> for Vector {
+    fn mul_assign(&mut self, scalar: T) {
+        let scalar_f32 = scalar.to_f32().unwrap();
+        for i in 0..self.len() {
+            self[i] *= scalar_f32;
+        }
     }
 }
 
-// Vector Sum
-
-impl<T: Add<Output = T> + Copy> Add<Vector<T>> for Vector<T> {
-    type Output = Vector<T>;
-
-    fn add(self, other: Vector<T>) -> Vector<T> {
-        Vector::from_iter((0..self.data.len()).map(|i| match i < other.data.len() {
-            true => self[i] + other[i],
-            false => self[i],
-        }))
+impl<T: ToPrimitive> DivAssign<T> for Vector {
+    fn div_assign(&mut self, scalar: T) {
+        let scalar_f32 = scalar.to_f32().unwrap();
+        for i in 0..self.len() {
+            self[i] /= scalar_f32;
+        }
     }
 }
 
-impl<'a, T: Add<Output = T> + Copy> Add<&'a Vector<T>> for Vector<T> {
-    type Output = Vector<T>;
+// Vector Ops Assignment
 
-    fn add(self, other: &'a Vector<T>) -> Vector<T> {
-        self + other.clone()
+impl AddAssign for Vector {
+    fn add_assign(&mut self, rhs: Self) {
+        assert_eq!(self.len(), rhs.len());
+        for i in 0..self.len() {
+            self[i] += rhs[i];
+        }
     }
 }
 
-impl<'a, T: Add<Output = T> + Copy> Add<Vector<T>> for &'a Vector<T> {
-    type Output = Vector<T>;
-
-    fn add(self, other: Vector<T>) -> Vector<T> {
-        self.clone() + other
+impl SubAssign for Vector {
+    fn sub_assign(&mut self, rhs: Self) {
+        assert_eq!(self.len(), rhs.len());
+        for i in 0..self.len() {
+            self[i] -= rhs[i];
+        }
     }
 }
-
-impl<'a, 'b, T: Add<Output = T> + Copy> Add<&'a Vector<T>> for &'b Vector<T> {
-    type Output = Vector<T>;
-
-    fn add(self, other: &'a Vector<T>) -> Vector<T> {
-        self.clone() + other.clone()
-    }
-}
-
-// Scalar Product
-
-impl<T: Mul<Output = T> + Copy> Mul<T> for Vector<T> {
-    type Output = Vector<T>;
-
-    fn mul(self, scalar: T) -> Vector<T> {
-        Vector::from_iter(self.data.iter().map(|&x| x * scalar))
-    }
-}
-
-impl<'a, T: Mul<Output = T> + Copy> Mul<&'a T> for Vector<T> {
-    type Output = Vector<T>;
-
-    fn mul(self, scalar: &'a T) -> Vector<T> {
-        self * *scalar
-    }
-}
-
-impl<'a, T: Mul<Output = T> + Copy> Mul<T> for &'a Vector<T> {
-    type Output = Vector<T>;
-
-    fn mul(self, scalar: T) -> Vector<T> {
-        self.clone() * scalar
-    }
-}
-
-impl<'a, 'b, T: Mul<Output = T> + Copy> Mul<&'a T> for &'b Vector<T> {
-    type Output = Vector<T>;
-
-    fn mul(self, scalar: &'a T) -> Vector<T> {
-        self.clone() * *scalar
-    }
-}
-
-// Dot Product
-
-impl<T: Mul<Output = T> + Sum + Copy> Mul<Vector<T>> for Vector<T> {
-    type Output = T;
-
-    fn mul(self, other: Vector<T>) -> T {
-        (0..self.len()).map(|i| self[i] * other[i]).sum()
-    }
-}
-
-impl<'a, T: Mul<Output = T> + Sum + Copy> Mul<&'a Vector<T>> for Vector<T> {
-    type Output = T;
-
-    fn mul(self, other: &'a Vector<T>) -> T {
-        self * other.clone()
-    }
-}
-
-impl<'a, T: Mul<Output = T> + Sum + Copy> Mul<Vector<T>> for &'a Vector<T> {
-    type Output = T;
-
-    fn mul(self, other: Vector<T>) -> T {
-        self.clone() * other
-    }
-}
-
-impl<'a, 'b, T: Mul<Output = T> + Sum + Copy> Mul<&'a Vector<T>> for &'b Vector<T> {
-    type Output = T;
-
-    fn mul(self, other: &'a Vector<T>) -> T {
-        self.clone() * other.clone()
-    }
-}
-
-// Cross product
-
-//...
 
 // Indexing
 
-impl<T> Index<usize> for Vector<T> {
-    type Output = T;
+impl Index<usize> for Vector {
+    type Output = f32;
 
-    fn index(&self, index: usize) -> &T {
+    fn index(&self, index: usize) -> &Self::Output {
         &self.data[index]
     }
 }
 
-impl<T> IndexMut<usize> for Vector<T> {
-    fn index_mut(&mut self, index: usize) -> &mut T {
+impl IndexMut<usize> for Vector {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         &mut self.data[index]
     }
 }
 
 // Iterators
 
-impl<T> IntoIterator for Vector<T> {
-    type Item = T;
+impl IntoIterator for Vector {
+    type Item = f32;
     type IntoIter = std::vec::IntoIter<Self::Item>;
 
     fn into_iter(self) -> Self::IntoIter {
@@ -196,9 +198,18 @@ impl<T> IntoIterator for Vector<T> {
     }
 }
 
-impl<T> FromIterator<T> for Vector<T> {
-    fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Vector<T> {
-        let data: Vec<T> = iter.into_iter().collect();
-        Vector { data }
+impl FromIterator<f32> for Vector {
+    fn from_iter<I: IntoIterator<Item = f32>>(iter: I) -> Vector {
+        Vector {
+            data: iter.into_iter().collect(),
+        }
+    }
+}
+
+impl FromIterator<i32> for Vector {
+    fn from_iter<I: IntoIterator<Item = i32>>(iter: I) -> Vector {
+        Vector {
+            data: iter.into_iter().map(|x| x as f32).collect(),
+        }
     }
 }
