@@ -1,6 +1,6 @@
 #[macro_use]
 extern crate impl_ops;
 
-pub mod library;
+pub mod prelude;
 
-pub use library::*;
+pub use prelude::*;
