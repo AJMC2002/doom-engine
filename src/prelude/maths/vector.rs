@@ -7,6 +7,8 @@ use std::ops::IndexMut;
 use std::ops::MulAssign;
 use std::ops::SubAssign;
 
+use super::Matrix;
+
 #[derive(Clone, PartialEq, Debug, Default)]
 pub struct Vector {
     data: Vec<f32>,
@@ -40,6 +42,13 @@ impl Vector {
         Self { data: v }
     }
 
+    pub fn from_matrix(m: &Matrix) -> Self {
+        assert_eq!(m.cols(), 1);
+        Self {
+            data: m.as_slice().to_vec(),
+        }
+    }
+
     pub fn abs(&self) -> f32 {
         self.clone().into_iter().map(|x| x * x).sum::<f32>().sqrt()
     }
@@ -60,6 +69,10 @@ impl Vector {
             self[2] * other[0] + self[0] * other[2],
             self[0] * other[1] + self[1] * other[0],
         ])
+    }
+
+    pub fn as_slice(&self) -> &[f32] {
+        &self.data
     }
 }
 

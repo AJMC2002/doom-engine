@@ -4,6 +4,9 @@ use gl::types::*;
 
 use doom_engine::graphics::{wrapper::*, Window};
 
+// #[macro_use]
+// extern crate doom_engine;
+
 static WIDTH: u32 = 1080;
 
 static HEIGHT: u32 = 720;

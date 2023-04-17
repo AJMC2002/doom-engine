@@ -3,6 +3,8 @@ use std::ops::{Index, IndexMut};
 
 use cgmath::num_traits::ToPrimitive;
 
+use super::Vector;
+
 #[derive(Clone, PartialEq, Debug, Default)]
 pub struct Matrix {
     data: Vec<f32>,
@@ -79,8 +81,16 @@ impl Matrix {
         m
     }
 
-    pub fn from_slice(slice: &[&[f32]]) -> Matrix {
-        Matrix::from_vec(slice.into_iter().map(|r| r.to_vec()).collect())
+    pub fn from_vector(data: &Vector) -> Self {
+        Matrix {
+            data: data.as_slice().to_vec(),
+            rows: data.len(),
+            cols: 1,
+        }
+    }
+
+    pub fn from_slice(slice: &[&[f32]]) -> Self {
+        Self::from_vec(slice.into_iter().map(|r| r.to_vec()).collect())
     }
 
     pub fn as_slice(&self) -> &[f32] {
@@ -91,7 +101,7 @@ impl Matrix {
         &mut self.data[..]
     }
 
-    pub fn reshape(&self, new_rows: usize, new_cols: usize) -> Matrix {
+    pub fn reshape(&self, new_rows: usize, new_cols: usize) -> Self {
         assert_eq!(self.rows * self.cols, new_rows * new_cols);
         Matrix::new(new_rows, new_cols, self.data.clone())
     }
@@ -248,6 +258,13 @@ impl_op_ex!(*|lhs: &Matrix, rhs: &Matrix| -> Matrix {
             })
             .collect(),
     )
+});
+
+// Vector Ops
+
+impl_op_ex!(*|matrix: &Matrix, vector: &Vector| -> Matrix {
+    assert_eq!(matrix.cols(), vector.len());
+    matrix * Matrix::from_vector(vector)
 });
 
 // Scalar Ops Assignment
