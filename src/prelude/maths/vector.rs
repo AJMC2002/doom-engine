@@ -20,12 +20,16 @@ macro_rules! vector {
 }
 
 impl Vector {
-    pub fn empty(n: usize) {
+    pub fn new(n: usize, val: f32) {
+        Vector::from_vec(vec![val; n]);
+    }
+
+    pub fn zeroes(n: usize) {
         Vector::from_vec(vec![0.; n]);
     }
 
-    pub fn new(val: f32, n: usize) {
-        Vector::from_vec(vec![val; n]);
+    pub fn ones(n: usize) {
+        Vector::from_vec(vec![1.; n]);
     }
 
     pub fn len(&self) -> usize {

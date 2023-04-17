@@ -78,7 +78,9 @@ mod tests {
 
         #[test]
         fn new_matrix() {
-            let mut m = Matrix::empty(3, 3);
+            let mut m = Matrix::zeroes(3, 3);
+            assert_eq!(m.rows(), 3);
+            assert_eq!(m.cols(), 3);
             assert_eq!(m[0], [0., 0., 0.]);
             assert_eq!(m[0][0], 0.);
             m[1][1] = 25.;
@@ -87,8 +89,42 @@ mod tests {
         }
 
         #[test]
+        fn from_constructors() {
+            let m1 = Matrix::from_slice(&[
+                &[1., 2., 3., 4.],
+                &[1., 2., 3., 4.],
+                &[1., 2., 3., 4.],
+                &[1., 2., 3., 4.],
+            ]);
+            assert_eq!(m1.rows(), 4);
+            assert_eq!(m1.cols(), 4);
+            assert_eq!(m1[0][0], 1.);
+            assert_eq!(m1[3][3], 4.);
+
+            let m2 = Matrix::from_vec(vec![vec![1., 2.], vec![1., 2.]]);
+            assert_eq!(m2.rows(), 2);
+            assert_eq!(m2.cols(), 2);
+            assert_eq!(m2[0][0], 1.);
+            assert_eq!(m2[1][1], 2.);
+        }
+
+        #[test]
         fn matrix_macro() {
             let m = matrix![[1., 2., 3.], [1., 2., 3.]];
+            assert_eq!(m.rows(), 2);
+            assert_eq!(m.cols(), 3);
+            assert_eq!(m[0], [1., 2., 3.]);
+            assert_eq!(m[0][0], 1.);
+        }
+
+        #[test]
+        fn determinant() {
+            let m1 = matrix![[2.]];
+            assert_eq!(m1.det(), 2.);
+            let m2 = matrix![[2., -1.], [-1., 2.]];
+            assert_eq!(m2.det(), 3.);
+            let m3 = matrix![[2., -1., 0.], [-1., 2., -1.], [0., -1., 2.]];
+            assert_eq!(m3.det(), 4.);
         }
     }
 }
