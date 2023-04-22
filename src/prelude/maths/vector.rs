@@ -8,6 +8,7 @@ use std::ops::MulAssign;
 use std::ops::SubAssign;
 
 use super::Matrix;
+use crate::matrix;
 
 #[derive(Clone, PartialEq, Debug, Default)]
 pub struct Vector {
@@ -38,17 +39,6 @@ impl Vector {
         self.data.len()
     }
 
-    pub fn from_vec(v: Vec<f32>) -> Self {
-        Self { data: v }
-    }
-
-    pub fn from_matrix(m: &Matrix) -> Self {
-        assert_eq!(m.cols(), 1);
-        Self {
-            data: m.as_slice().to_vec(),
-        }
-    }
-
     pub fn abs(&self) -> f32 {
         self.clone().into_iter().map(|x| x * x).sum::<f32>().sqrt()
     }
@@ -71,8 +61,79 @@ impl Vector {
         ])
     }
 
+    // Vec3 Ops
+
+    pub fn scale(&mut self, v: Vector) {
+        assert_eq!(self.len(), 4);
+        assert_eq!(v.len(), 3);
+        self[0] = self[0] * v[0];
+        self[1] = self[1] * v[1];
+        self[2] = self[2] * v[2];
+    }
+
+    pub fn translate(&mut self, v: Vector) {
+        assert_eq!(self.len(), 4);
+        assert_eq!(v.len(), 3);
+        self[0] = self[0] * v[0];
+        self[1] = self[1] * v[1];
+        self[2] = self[2] * v[2];
+    }
+
+    pub fn rotate_x(&mut self, angle: f32) {
+        let rot_m = matrix![
+            [1., 0., 0., 0.],
+            [0., angle.cos(), -angle.sin(), 0.],
+            [0., angle.sin(), angle.cos(), 0.],
+            [0., 0., 0., 1.]
+        ];
+        let ans = (rot_m * self.clone()).as_vector();
+        for i in 0..self.len() {
+            self[i] = ans[i];
+        }
+    }
+
+    pub fn rotate_y(&mut self, angle: f32) {
+        let rot_m = matrix![
+            [angle.cos(), 0., angle.sin(), 0.],
+            [0., 1., 0., 0.],
+            [-angle.sin(), 0., angle.cos(), 0.],
+            [0., 0., 0., 1.]
+        ];
+        let ans = (rot_m * self.clone()).as_vector();
+        for i in 0..self.len() {
+            self[i] = ans[i];
+        }
+    }
+
+    pub fn rotate_z(&mut self, angle: f32) {
+        let rot_m = matrix![
+            [angle.cos(), -angle.sin(), 0., 0.],
+            [angle.sin(), angle.cos(), 0., 0.],
+            [0., 0., 1., 0.],
+            [0., 0., 0., 1.]
+        ];
+        let ans = (rot_m * self.clone()).as_vector();
+        for i in 0..self.len() {
+            self[i] = ans[i];
+        }
+    }
+
+    // Conversion
+
+    pub fn from_vec(v: Vec<f32>) -> Self {
+        Self { data: v }
+    }
+
+    pub fn from_matrix(m: &Matrix) -> Self {
+        m.as_vector()
+    }
+
     pub fn as_slice(&self) -> &[f32] {
         &self.data
+    }
+
+    pub fn as_matrix(&self) -> Matrix {
+        Matrix::from_vector(self)
     }
 }
 

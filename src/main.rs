@@ -24,14 +24,14 @@ fn main() {
 
     let vertices = [
         // positions [3] // tex [2]
-        0.7, 0.3, 0.0, 1.0, 1.0, // top right
-        0.3, -0.4, 0.0, 0.5, 0.0, // bottom right
-        -0.3, -0.4, 0.0, 1.0, 1.0, // bottom left
-        -0.5, 0.5, 0.0, 0.4, 1.0, // top left
+        -0.5, 0.5, 0.0, 0.0, 1.0, // top right
+        0.5, 0.5, 0.0, 1., 1., // bottom right
+        -0.5, -0.5, 0.0, 0., 0., // bottom left
+        0.5, -0.5, 0.0, 1., 0., // top left
     ];
 
     let indices = [
-        0, 1, 3, // first Triangle
+        0, 1, 2, // first Triangle
         1, 2, 3, // second Triangle
     ];
 

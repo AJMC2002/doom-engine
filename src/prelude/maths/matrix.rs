@@ -151,6 +151,11 @@ impl Matrix {
                 .sum()
         }
     }
+
+    pub fn as_vector(&self) -> Vector {
+        assert_eq!(self.cols(), 1);
+        Vector::from_vec(self.data.clone())
+    }
 }
 
 // Unary Ops
