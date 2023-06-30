@@ -7,6 +7,7 @@ pub struct VertexAttrib {
     index: GLuint,
 }
 
+#[allow(clippy::not_unsafe_ptr_arg_deref)]
 impl VertexAttrib {
     pub fn new(
         index: u32,

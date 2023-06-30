@@ -8,7 +8,10 @@ pub struct VAO {
 impl VAO {
     pub fn new() -> VAO {
         let mut id = 0;
-        unsafe { gl::GenVertexArrays(1, &mut id) }
+        unsafe {
+            gl::GenVertexArrays(1, &mut id);
+            gl::BindVertexArray(id);
+        }
         VAO { id }
     }
 
@@ -18,5 +21,11 @@ impl VAO {
 
     pub fn unbind(&self) {
         unsafe { gl::BindVertexArray(0) }
+    }
+}
+
+impl Default for VAO {
+    fn default() -> Self {
+        Self::new()
     }
 }

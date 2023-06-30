@@ -22,32 +22,25 @@ fn main() {
 
     let texture: Texture2D = Texture2D::new("resources/textures/cat.jpg");
 
-    let vertices = [
-        // positions [3] // tex [2]
-        -0.5, 0.5, 0.0, 0.0, 1.0, // top right
-        0.5, 0.5, 0.0, 1., 1., // bottom right
-        -0.5, -0.5, 0.0, 0., 0., // bottom left
-        0.5, -0.5, 0.0, 1., 0., // top left
-    ];
-
-    let indices = [
-        0, 1, 2, // first Triangle
-        1, 2, 3, // second Triangle
-    ];
-
+    //All Buffer Objects are binded and the data is stored on creation
     let vao: VAO = VAO::new();
-    let vbo: VBO = BO::new(gl::STATIC_DRAW);
-    let ebo: EBO = BO::new(gl::STATIC_DRAW);
-
-    vao.bind();
-
-    vbo.bind();
-    vbo.store(&vertices);
-
-    ebo.bind();
-    ebo.store(&indices);
-
-    //TODO change how store() works
+    let vbo: VBO = BO::new(
+        gl::STATIC_DRAW,
+        Box::new([
+            // positions [3] // tex [2]
+            -0.5, 0.5, 0.0, 0.0, 1.0, // top right
+            0.5, 0.5, 0.0, 1., 1., // bottom right
+            -0.5, -0.5, 0.0, 0., 0., // bottom left
+            0.5, -0.5, 0.0, 1., 0., // top left
+        ]),
+    );
+    let ebo: EBO = BO::new(
+        gl::STATIC_DRAW,
+        Box::new([
+            0, 1, 2, // first Triangle
+            1, 2, 3, // second Triangle
+        ]),
+    );
 
     let stride = 5 * mem::size_of::<GLfloat>() as GLsizei;
 
@@ -64,8 +57,9 @@ fn main() {
     pos_attrib.enable();
     tex_attrib.enable();
 
-    vbo.unbind();
-    vao.unbind();
+    // vao.unbind();
+    // vbo.unbind();
+    // ebo.unbind();
 
     // unsafe {
     //     gl::PolygonMode(gl::FRONT_AND_BACK, gl::LINE);
@@ -81,7 +75,6 @@ fn main() {
             shader_program.bind();
             shader_program.create_4f_uniform("globalColor", 1.0 - color, color, 0.0, 1.0);
             shader_program.create_2dtex_uniform("myTex", &texture);
-            vao.bind();
 
             gl::DrawElements(gl::TRIANGLES, 6, gl::UNSIGNED_INT, ptr::null());
         }
