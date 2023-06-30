@@ -74,7 +74,10 @@ mod tests {
     }
 
     mod matrix_tests {
-        use doom_engine::{maths::Matrix, matrix};
+        use doom_engine::{
+            maths::{Matrix, Vector},
+            matrix, vector,
+        };
 
         #[test]
         fn new_matrix() {
@@ -125,6 +128,28 @@ mod tests {
             assert_eq!(m2.det(), 3.);
             let m3 = matrix![[2., -1., 0.], [-1., 2., -1.], [0., -1., 2.]];
             assert_eq!(m3.det(), 4.);
+        }
+
+        #[test]
+        fn mul_with_vec() {
+            let m = matrix![[2., 43., 243.], [3., 123., 11.], [4., 10., 100.]];
+            let v = vector![1., 2., 3.];
+            let result = matrix![
+                [2. + 43. * 2. + 243. * 3.],
+                [3. + 123. * 2. + 11. * 3.],
+                [4. + 10. * 2. + 100. * 3.]
+            ];
+            assert_eq!(m * v, result);
+        }
+
+        #[test]
+        fn mul_with_mat() {
+            let m1 = matrix![[1., 4., 7.], [2., 5., 8.], [3., 6., 9.]];
+            let m2 = matrix![[1., 2., 3.], [4., 5., 6.], [7., 8., 9.]];
+            let result12 = matrix![[66., 78., 90.], [78., 93., 108.], [90., 108., 126.]];
+            assert_eq!(&m1 * &m2, result12);
+            let result21 = matrix![[14., 32., 50.], [32., 77., 122.], [50., 122., 194.]];
+            assert_eq!(&m2 * &m1, result21);
         }
     }
 }

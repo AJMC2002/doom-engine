@@ -47,6 +47,8 @@ fn main() {
     ebo.bind();
     ebo.store(&indices);
 
+    //TODO change how store() works
+
     let stride = 5 * mem::size_of::<GLfloat>() as GLsizei;
 
     let pos_attrib = VertexAttrib::new(0, 3, gl::FLOAT, gl::FALSE, stride, ptr::null());
