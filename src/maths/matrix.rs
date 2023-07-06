@@ -90,7 +90,7 @@ impl Matrix {
     }
 
     pub fn from_slice(slice: &[&[f32]]) -> Self {
-        Self::from_vec(slice.into_iter().map(|r| r.to_vec()).collect())
+        Self::from_vec(slice.iter().map(|r| r.to_vec()).collect())
     }
 
     pub fn as_slice(&self) -> &[f32] {

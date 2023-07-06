@@ -23,8 +23,8 @@ macro_rules! vector {
 }
 
 impl Vector {
-    pub fn new(n: usize, val: f32) {
-        Vector::from_vec(vec![val; n]);
+    pub fn new(n: usize, val: f32) -> Self {
+        Vector::from_vec(vec![val; n])
     }
 
     pub fn zeroes(n: usize) {
@@ -37,6 +37,10 @@ impl Vector {
 
     pub fn len(&self) -> usize {
         self.data.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 
     pub fn abs(&self) -> f32 {
@@ -66,17 +70,17 @@ impl Vector {
     pub fn scale(&mut self, v: Vector) {
         assert_eq!(self.len(), 4);
         assert_eq!(v.len(), 3);
-        self[0] = self[0] * v[0];
-        self[1] = self[1] * v[1];
-        self[2] = self[2] * v[2];
+        self[0] *= v[0];
+        self[1] *= v[1];
+        self[2] *= v[2];
     }
 
     pub fn translate(&mut self, v: Vector) {
         assert_eq!(self.len(), 4);
         assert_eq!(v.len(), 3);
-        self[0] = self[0] * v[0];
-        self[1] = self[1] * v[1];
-        self[2] = self[2] * v[2];
+        self[0] *= v[0];
+        self[1] *= v[1];
+        self[2] *= v[2];
     }
 
     pub fn rotate_x(&mut self, angle: f32) {

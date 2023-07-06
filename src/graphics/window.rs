@@ -10,7 +10,7 @@ pub struct Window {
 impl Window {
     pub fn new(width: u32, height: u32, title: &str) -> Window {
         let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
-        glfw.window_hint(glfw::WindowHint::ContextVersion(3, 3));
+        glfw.window_hint(glfw::WindowHint::ContextVersion(4, 6));
         glfw.window_hint(glfw::WindowHint::OpenGlProfile(
             glfw::OpenGlProfileHint::Core,
         ));
@@ -32,6 +32,7 @@ impl Window {
     pub fn init_gl(&mut self) {
         self.window.make_current();
         gl::load_with(|symbol| self.window.get_proc_address(symbol) as *const _);
+        gl::Viewport::load_with(|symbol| self.window.get_proc_address(symbol) as *const _);
     }
 
     pub fn should_close(&self) -> bool {

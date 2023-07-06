@@ -17,7 +17,10 @@ impl VertexAttrib {
         stride: GLsizei,
         pointer: *const c_void,
     ) -> VertexAttrib {
-        unsafe { gl::VertexAttribPointer(index, size, type_, normalized, stride, pointer) }
+        unsafe {
+            gl::VertexAttribPointer(index, size, type_, normalized, stride, pointer);
+            gl::EnableVertexAttribArray(index)
+        }
 
         VertexAttrib { index }
     }

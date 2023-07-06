@@ -4,9 +4,6 @@ use gl::types::*;
 
 use doom_engine::graphics::{wrapper::*, Window};
 
-// #[macro_use]
-// extern crate doom_engine;
-
 static WIDTH: u32 = 1080;
 
 static HEIGHT: u32 = 720;
@@ -23,8 +20,8 @@ fn main() {
     let texture: Texture2D = Texture2D::new("resources/textures/cat.jpg");
 
     //All Buffer Objects are binded and the data is stored on creation
-    let vao: VAO = VAO::new();
-    let vbo: VBO = BO::new(
+    let _vao: VAO = VAO::new();
+    let _vbo: VBO = BO::new(
         gl::STATIC_DRAW,
         Box::new([
             // positions [3] // tex [2]
@@ -34,18 +31,18 @@ fn main() {
             0.5, -0.5, 0.0, 1., 0., // top left
         ]),
     );
-    let ebo: EBO = BO::new(
+    let _ebo: EBO = BO::new(
         gl::STATIC_DRAW,
         Box::new([
-            0, 1, 2, // first Triangle
-            1, 2, 3, // second Triangle
+            2, 1, 0, // first Triangle
+            3, 2, 1, // second Triangle
         ]),
     );
 
     let stride = 5 * mem::size_of::<GLfloat>() as GLsizei;
 
-    let pos_attrib = VertexAttrib::new(0, 3, gl::FLOAT, gl::FALSE, stride, ptr::null());
-    let tex_attrib = VertexAttrib::new(
+    let _pos_attrib = VertexAttrib::new(0, 3, gl::FLOAT, gl::FALSE, stride, ptr::null());
+    let _tex_attrib = VertexAttrib::new(
         1,
         2,
         gl::FLOAT,
@@ -53,13 +50,6 @@ fn main() {
         stride,
         (3 * mem::size_of::<GLfloat>()) as *const c_void,
     );
-
-    pos_attrib.enable();
-    tex_attrib.enable();
-
-    // vao.unbind();
-    // vbo.unbind();
-    // ebo.unbind();
 
     // unsafe {
     //     gl::PolygonMode(gl::FRONT_AND_BACK, gl::LINE);
@@ -73,11 +63,30 @@ fn main() {
             let t = window.get_time() as f32;
             let color = (t.sin() / 2.0) + 0.5;
             shader_program.bind();
-            shader_program.create_4f_uniform("globalColor", 1.0 - color, color, 0.0, 1.0);
+            shader_program.create_4f_uniform("globalColor", 1.0 - color, color, color.powi(2), 1.0);
             shader_program.create_2dtex_uniform("myTex", &texture);
 
             gl::DrawElements(gl::TRIANGLES, 6, gl::UNSIGNED_INT, ptr::null());
         }
+        error_logger();
         window.update();
+    }
+
+    _vao.unbind();
+    _vbo.unbind();
+    _ebo.unbind();
+    _pos_attrib.disable();
+    _tex_attrib.disable();
+}
+
+fn error_logger() {
+    unsafe {
+        let mut e: GLenum;
+        while {
+            e = gl::GetError();
+            e != gl::NO_ERROR
+        } {
+            println!("Error {:?}", e as GLenum)
+        }
     }
 }

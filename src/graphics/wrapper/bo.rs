@@ -26,7 +26,7 @@ impl BO<f32> for VBO {
             gl::BufferData(
                 gl::ARRAY_BUFFER,
                 (data.len() * mem::size_of::<GLfloat>()) as GLsizeiptr,
-                data.as_ptr() as *const GLvoid,
+                data.as_ptr().cast(),
                 usage,
             );
         }
@@ -69,7 +69,7 @@ impl BO<i32> for EBO {
             gl::BufferData(
                 gl::ELEMENT_ARRAY_BUFFER,
                 (data.len() * mem::size_of::<GLfloat>()) as GLsizeiptr,
-                data.as_ptr() as *const GLvoid,
+                data.as_ptr().cast(),
                 usage,
             );
         }
