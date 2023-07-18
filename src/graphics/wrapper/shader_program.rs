@@ -1,6 +1,9 @@
 use std::{collections::HashMap, ffi::CString, fs::File, io::Read, ptr};
 
-use gl::types::*;
+use egui_glfw_gl::gl;
+use egui_glfw_gl::gl::types::*;
+
+use crate::maths::Vector;
 
 use super::texture::Texture2D;
 
@@ -57,51 +60,59 @@ impl ShaderProgram {
         }
     }
 
-    pub fn unbind() {
+    pub fn unbind(&self) {
         unsafe {
             gl::UseProgram(0);
         }
     }
 
-    pub fn create_4f_uniform(&mut self, uniform_name: &str, v0: f32, v1: f32, v2: f32, v3: f32) {
-        let uniform_name_cstring = CString::new(uniform_name).unwrap();
-        let uniform_location =
-            unsafe { gl::GetUniformLocation(self.id, uniform_name_cstring.as_ptr()) };
-        if uniform_location < 0 {
-            panic!("Cannot locate uniform: {}", uniform_name);
-        } else {
-            self.uniform_ids
-                .insert(uniform_name.to_string(), uniform_location);
+    pub fn uniform_4f(&mut self, name: &str, v: Vector) {
+        assert!(v.len() == 4);
+        let location = match self.uniform_ids.get(&name.to_string()) {
+            Some(id) => *id,
+            None => {
+                let name_cstring = CString::new(name).unwrap();
+                let loc = unsafe { gl::GetUniformLocation(self.id, name_cstring.as_ptr()) };
+                if loc < 0 {
+                    panic!("Cannot locate uniform: {}", name);
+                } else {
+                    self.uniform_ids.insert(name.to_string(), loc);
+                }
+                loc
+            }
+        };
+        unsafe {
+            gl::Uniform4f(location, v[0], v[1], v[2], v[3]);
         }
-
-        unsafe { gl::Uniform4f(uniform_location, v0, v1, v2, v3) }
     }
 
-    pub fn create_2dtex_uniform(&mut self, uniform_name: &str, tex: &Texture2D) {
-        let uniform_name_cstring = CString::new(uniform_name).unwrap();
-        let uniform_location =
-            unsafe { gl::GetUniformLocation(self.id, uniform_name_cstring.as_ptr()) };
-        if uniform_location < 0 {
-            panic!("Cannot locate uniform: {}", uniform_name);
-        } else {
-            self.uniform_ids
-                .insert(uniform_name.to_string(), uniform_location);
-        }
+    pub fn uniform_2dtex(&mut self, name: &str, tex: &Texture2D) {
+        match self.uniform_ids.get(&name.to_string()) {
+            Some(id) => *id,
+            None => {
+                let name_cstring = CString::new(name).unwrap();
+                let loc = unsafe { gl::GetUniformLocation(self.id, name_cstring.as_ptr()) };
+                if loc < 0 {
+                    panic!("Cannot locate uniform: {}", name);
+                } else {
+                    self.uniform_ids.insert(name.to_string(), loc);
+                }
+                loc
+            }
+        };
 
         unsafe {
             tex.bind();
             gl::ActiveTexture(gl::TEXTURE0);
         }
     }
+}
 
-    // pub fn set_matrix4fv_uniform(&self, uniform_name: &str, matrix: &cgmath::Matrix4<f32>) {
-    //     unsafe {
-    //         gl::UniformMatrix4fv(
-    //             self.uniform_ids[uniform_name],
-    //             1,
-    //             gl::FALSE,
-    //             matrix.as_ptr(),
-    //         )
-    //     }
-    // }
+impl Drop for ShaderProgram {
+    fn drop(&mut self) {
+        self.unbind();
+        unsafe {
+            gl::DeleteProgram(self.id);
+        }
+    }
 }

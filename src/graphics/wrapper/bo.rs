@@ -1,6 +1,7 @@
 use std::mem;
 
-use gl::types::*;
+use egui_glfw_gl::gl;
+use egui_glfw_gl::gl::types::*;
 
 // Buffer Object
 pub trait BO<Ty> {
@@ -40,17 +41,15 @@ impl BO<f32> for VBO {
     fn unbind(&self) {
         unsafe { gl::BindBuffer(gl::ARRAY_BUFFER, 0) }
     }
+}
 
-    // fn store(&self) {
-    //     unsafe {
-    //         gl::BufferData(
-    //             gl::ARRAY_BUFFER,
-    //             (self.data.len() * mem::size_of::<GLfloat>()) as GLsizeiptr,
-    //             self.data.as_ptr() as *const GLvoid,
-    //             self.usage,
-    //         )
-    //     }
-    // }
+impl Drop for VBO {
+    fn drop(&mut self) {
+        self.unbind();
+        unsafe {
+            gl::DeleteBuffers(1, &self.id);
+        }
+    }
 }
 
 // Element Buffer Object
@@ -83,15 +82,13 @@ impl BO<i32> for EBO {
     fn unbind(&self) {
         unsafe { gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, 0) }
     }
+}
 
-    // fn store(&self) {
-    //     unsafe {
-    //         gl::BufferData(
-    //             gl::ELEMENT_ARRAY_BUFFER,
-    //             (self.data.len() * mem::size_of::<GLfloat>()) as GLsizeiptr,
-    //             self.data.as_ptr() as *const GLvoid,
-    //             self.usage,
-    //         )
-    //     }
-    // }
+impl Drop for EBO {
+    fn drop(&mut self) {
+        self.unbind();
+        unsafe {
+            gl::DeleteBuffers(1, &self.id);
+        }
+    }
 }

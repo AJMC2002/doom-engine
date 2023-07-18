@@ -1,4 +1,5 @@
-use gl::types::*;
+use egui_glfw_gl::gl;
+use egui_glfw_gl::gl::types::*;
 use image::GenericImageView;
 
 pub struct Texture2D {
@@ -41,6 +42,21 @@ impl Texture2D {
     pub fn bind(&self) {
         unsafe {
             gl::BindTexture(gl::TEXTURE_2D, self.id);
+        }
+    }
+
+    pub fn unbind(&self) {
+        unsafe {
+            gl::BindTexture(gl::TEXTURE_2D, 0);
+        }
+    }
+}
+
+impl Drop for Texture2D {
+    fn drop(&mut self) {
+        self.unbind();
+        unsafe {
+            gl::DeleteTextures(1, &self.id);
         }
     }
 }
