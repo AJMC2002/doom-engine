@@ -18,7 +18,7 @@ pub struct Vector {
 #[macro_export]
 macro_rules! vector {
     ( $( $x:expr ),* ) => {
-        Vector::from_vec(vec![ $( $x ),* ])
+        $crate::maths::Vector::from_vec(vec![ $( $x ),* ])
     };
 }
 
@@ -78,9 +78,9 @@ impl Vector {
     pub fn translate(&mut self, v: Vector) {
         assert_eq!(self.len(), 4);
         assert_eq!(v.len(), 3);
-        self[0] *= v[0];
-        self[1] *= v[1];
-        self[2] *= v[2];
+        self[0] += v[0];
+        self[1] += v[1];
+        self[2] += v[2];
     }
 
     pub fn rotate_x(&mut self, angle: f32) {

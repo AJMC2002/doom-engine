@@ -74,10 +74,7 @@ mod tests {
     }
 
     mod matrix_tests {
-        use doom_engine::{
-            maths::{Matrix, Vector},
-            matrix, vector,
-        };
+        use doom_engine::{maths::Matrix, matrix, vector};
 
         #[test]
         fn new_matrix() {

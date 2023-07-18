@@ -15,9 +15,11 @@ pub struct Matrix {
 #[macro_export]
 macro_rules! matrix {
     ( $( $arr:expr ),* ) => {
-        Matrix::from_vec(vec![ $( $arr.to_vec() ),* ])
+        $crate::maths::Matrix::from_vec(vec![ $( $arr.to_vec() ),* ])
     };
 }
+
+//Usual methods
 
 impl Matrix {
     pub fn new(rows: usize, cols: usize, data: Vec<f32>) -> Matrix {
@@ -25,20 +27,12 @@ impl Matrix {
         Matrix { data, rows, cols }
     }
 
-    pub fn zeroes(rows: usize, cols: usize) -> Self {
-        Self {
-            data: vec![0.; rows * cols],
-            rows,
-            cols,
+    pub fn identity(rows: usize, cols: usize) -> Self {
+        let mut m = Matrix::zeroes(rows, cols);
+        for i in 0..rows {
+            m[i][i] = 1.0;
         }
-    }
-
-    pub fn ones(rows: usize, cols: usize) -> Self {
-        Self {
-            data: vec![1.; rows * cols],
-            rows,
-            cols,
-        }
+        m
     }
 
     pub fn rows(&self) -> usize {
@@ -59,14 +53,6 @@ impl Matrix {
 
     fn is_square(&self) -> bool {
         self.rows == self.cols
-    }
-
-    pub fn identity(rows: usize, cols: usize) -> Self {
-        let mut m = Matrix::zeroes(rows, cols);
-        for i in 0..rows {
-            m[i][i] = 1.0;
-        }
-        m
     }
 
     pub fn from_vec(data: Vec<Vec<f32>>) -> Self {
@@ -152,9 +138,133 @@ impl Matrix {
         }
     }
 
+    ///Takes a column matrix and turns it into a vector
     pub fn as_vector(&self) -> Vector {
         assert_eq!(self.cols(), 1);
         Vector::from_vec(self.data.clone())
+    }
+}
+
+//Custom matrices
+
+impl Matrix {
+    pub fn zeroes(rows: usize, cols: usize) -> Self {
+        Self {
+            data: vec![0.; rows * cols],
+            rows,
+            cols,
+        }
+    }
+
+    pub fn ones(rows: usize, cols: usize) -> Self {
+        Self {
+            data: vec![1.; rows * cols],
+            rows,
+            cols,
+        }
+    }
+
+    pub fn scaling(values: Vector) -> Self {
+        assert_eq!(values.len(), 3);
+        Self {
+            data: vec![
+                values[0], 0., 0., 0., //row 1
+                0., values[1], 0., 0., //row 2
+                0., 0., values[2], 0., //row 3
+                0., 0., 0., 1., //row 4
+            ],
+            rows: 4,
+            cols: 4,
+        }
+    }
+
+    pub fn translation(values: Vector) -> Self {
+        assert_eq!(values.len(), 3);
+        Self {
+            data: vec![
+                1., 0., 0., values[0], //row 1
+                0., 1., 0., values[1], //row 2
+                0., 0., 1., values[2], //row 3
+                0., 0., 0., 1., //row 4
+            ],
+            rows: 4,
+            cols: 4,
+        }
+    }
+
+    pub fn rotation_x(angle: f32) -> Self {
+        Self {
+            data: vec![
+                1.,
+                0.,
+                0.,
+                0., //row 1
+                0.,
+                angle.cos(),
+                -angle.sin(),
+                0., //row 2
+                0.,
+                angle.sin(),
+                angle.cos(),
+                0., //row 3
+                0.,
+                0.,
+                0.,
+                1., //row 4
+            ],
+            rows: 4,
+            cols: 4,
+        }
+    }
+
+    pub fn rotation_y(angle: f32) -> Self {
+        Self {
+            data: vec![
+                angle.cos(),
+                0.,
+                angle.sin(),
+                0., //row 1
+                0.,
+                1.,
+                0.,
+                0., //row 2
+                -angle.sin(),
+                0.,
+                angle.cos(),
+                0., //row 3
+                0.,
+                0.,
+                0.,
+                1., //row 4
+            ],
+            rows: 4,
+            cols: 4,
+        }
+    }
+
+    pub fn rotation_z(angle: f32) -> Self {
+        Self {
+            data: vec![
+                angle.cos(),
+                -angle.sin(),
+                0.,
+                0., //row 1
+                angle.sin(),
+                angle.cos(),
+                0.,
+                0., //row 2
+                0.,
+                0.,
+                1.,
+                0., //row 3
+                0.,
+                0.,
+                0.,
+                1., //row 4
+            ],
+            rows: 4,
+            cols: 4,
+        }
     }
 }
 
