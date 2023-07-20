@@ -10,6 +10,12 @@ Got matrices and vectors for calculations
 
 Currently doing task 3 (learning imgui)
 
-## Examples
+## Demos
+
+Fragment coloring and quads
 
 ![milk](examples/Milk.png)
+
+Perspective and transformations
+
+<https://www.youtube.com/watch?v=HQWcm3fZbdE>

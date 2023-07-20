@@ -8,14 +8,15 @@ use egui_glfw_gl::gl::types::*;
 use std::f32::consts::PI;
 use std::{mem, os::raw::c_void, ptr};
 
-static WIDTH: u32 = 1080;
+static WIDTH: u32 = 1600;
 
-static HEIGHT: u32 = 720;
+static HEIGHT: u32 = 800;
 
 fn main() {
     let mut window = Window::new(WIDTH, HEIGHT, "Doom Engine");
 
     let mut painter = egui_glfw_gl::Painter::new(window.window_handle_mut(), WIDTH, HEIGHT);
+
     let mut egui_ctx = egui::CtxRef::default();
 
     let (width, height) = window.window_handle().get_framebuffer_size();
@@ -34,7 +35,9 @@ fn main() {
         "resources/shaders/basic/basic.frag",
     );
 
-    let texture = Texture2D::new("resources/textures/cat.jpg");
+    let texture_gato = Texture2D::new("resources/textures/cat.jpg");
+    let texture_gatorrito = Texture2D::new("resources/textures/gatorrito.jpg");
+    let texture_pog = Texture2D::new("resources/textures/pog.jpg");
 
     // All Buffer Objects are binded and the data is stored on creation
     let _vao = VAO::new();
@@ -42,10 +45,10 @@ fn main() {
         gl::STATIC_DRAW,
         Box::new([
             // positions [3] // tex [2]
-            -0.5, 0.5, 0.0, 0.0, 1.0, // top right
-            0.5, 0.5, 0.0, 1., 1., // bottom right
-            -0.5, -0.5, 0.0, 0., 0., // bottom left
-            0.5, -0.5, 0.0, 1., 0., // top left
+            -0.5, 0.5, 0., 0.0, 1.0, // top right
+            0.5, 0.5, 0., 1., 1., // bottom right
+            -0.5, -0.5, 0., 0., 0., // bottom left
+            0.5, -0.5, 0., 1., 0., // top left
         ]),
     );
     let _ebo: EBO = BO::new(
@@ -68,6 +71,16 @@ fn main() {
         (3 * mem::size_of::<GLfloat>()) as *const c_void,
     );
 
+    // _pos_attrib.disable();
+    // _tex_attrib.disable();
+    _ebo.unbind();
+    _vbo.unbind();
+    _vao.unbind();
+    texture_gato.unbind();
+    texture_gatorrito.unbind();
+    texture_pog.unbind();
+    shader_program.unbind();
+
     let mut scale = (
         1.0.to_string().to_owned(),
         1.0.to_string().to_owned(),
@@ -80,41 +93,80 @@ fn main() {
         0.0.to_string().to_owned(),
     );
 
+    unsafe {
+        gl::ClearColor(154. / 258., 127. / 258., 174. / 258., 1.0);
+    }
+
+    let mut t;
+
     while !window.window_handle().should_close() {
         unsafe {
-            gl::ClearColor(154. / 258., 127. / 258., 174. / 258., 1.0);
-            gl::Clear(gl::COLOR_BUFFER_BIT);
+            gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
 
-            let t = window.glfw_handle().get_time() as f32;
+            t = window.glfw_handle().get_time() as f32;
             let color = (t.sin() / 2.0) + 0.5;
 
-            _vao.bind();
-            _vbo.bind();
-            _ebo.bind();
             shader_program.bind();
-            _pos_attrib.enable();
-            _tex_attrib.enable();
-            texture.bind();
-            shader_program.uniform_4fv(
-                "globalColor",
-                vector![1.0 - color, color, color.powi(2), 1.0],
-            );
+            _vao.bind();
+            _ebo.bind();
+            texture_pog.bind();
+            // shader_program.uniform_4fv(
+            //     "globalColor",
+            //     vector![1.0 - color, color, color.powi(2), 1.0],
+            // );
             shader_program.uniform_matrix_4fv(
-                "trans",
+                "proj",
+                Matrix::projection_perspective(PI / 2., WIDTH as f32 / HEIGHT as f32, 0.1, 100.),
+            );
+            shader_program.uniform_matrix_4fv("view", Matrix::translation((0., 0., -1.5)));
+            shader_program.uniform_matrix_4fv(
+                "model",
                 Matrix::translation((
                     translate.0.parse::<f32>().unwrap_or(0.0),
                     translate.1.parse::<f32>().unwrap_or(0.0),
                     translate.2.parse::<f32>().unwrap_or(0.0),
-                )) * Matrix::rotation(rotate)
+                )) * Matrix::rotation((0.12, t, 0.))
+                    * Matrix::rotation(rotate)
                     * Matrix::scaling((
                         scale.0.parse::<f32>().unwrap_or(0.0),
                         scale.1.parse::<f32>().unwrap_or(0.0),
                         scale.2.parse::<f32>().unwrap_or(0.0),
                     )),
             );
-            shader_program.uniform_2dtex("myTex", &texture);
+            shader_program.uniform_2dtex("myTex", &texture_pog);
 
             gl::DrawElements(gl::TRIANGLES, 6, gl::UNSIGNED_INT, ptr::null());
+
+            texture_pog.unbind();
+            texture_gatorrito.bind();
+            shader_program.uniform_matrix_4fv(
+                "model",
+                Matrix::translation(((2. * t).sin(), 0., (2. * t).cos()))
+                    * Matrix::translation((
+                        translate.0.parse::<f32>().unwrap_or(0.0),
+                        translate.1.parse::<f32>().unwrap_or(0.0),
+                        translate.2.parse::<f32>().unwrap_or(0.0),
+                    ))
+                    * Matrix::rotation((0.12, 2. * PI * t, 0.))
+                    * Matrix::rotation(rotate)
+                    * Matrix::scaling((
+                        scale.0.parse::<f32>().unwrap_or(0.0),
+                        scale.1.parse::<f32>().unwrap_or(0.0),
+                        scale.2.parse::<f32>().unwrap_or(0.0),
+                    )),
+            );
+            shader_program.uniform_2dtex("myTex", &texture_gatorrito);
+
+            gl::DrawElements(gl::TRIANGLES, 6, gl::UNSIGNED_INT, ptr::null());
+
+            _vao.unbind();
+            _ebo.unbind();
+            texture_gatorrito.unbind();
+            shader_program.unbind();
+        }
+
+        unsafe {
+            gl::Disable(gl::DEPTH_TEST);
         }
 
         let (width, height) = window.window_handle().get_size();
@@ -190,6 +242,10 @@ fn main() {
             &egui_ctx.texture(),
             native_pixels_per_point,
         );
+
+        unsafe {
+            gl::Enable(gl::DEPTH_TEST);
+        }
 
         window.update(&mut egui_input_state);
     }
