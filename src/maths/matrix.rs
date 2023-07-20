@@ -272,6 +272,63 @@ impl Matrix {
             cols: 4,
         }
     }
+
+    pub fn projection_orthographic(
+        left: f32,
+        right: f32,
+        bottom: f32,
+        top: f32,
+        near: f32,
+        far: f32,
+    ) -> Self {
+        Self {
+            data: vec![
+                2. / (right - left),
+                0.,
+                0.,
+                -(right + left) / (right - left), //row 1
+                0.,
+                2. / (top - bottom),
+                0.,
+                -(top + bottom) / (top - bottom), //row 2
+                0.,
+                0.,
+                -2. / (far - near),
+                -(far + near) / (far - near), //row 3
+                0.,
+                0.,
+                0.,
+                1., //row 4
+            ],
+            rows: 4,
+            cols: 4,
+        }
+    }
+
+    pub fn projection_perspective(fov: f32, aspect: f32, near: f32, far: f32) -> Self {
+        Self {
+            data: vec![
+                (fov / 2.).cos() / (aspect * (fov / 2.).sin()),
+                0.,
+                0.,
+                0., //row 1
+                0.,
+                (fov / 2.).cos() / (fov / 2.).sin(),
+                0.,
+                0., //row 2
+                0.,
+                0.,
+                -(far + near) / (far - near),
+                -2. * far * near / (far - near), //row 3
+                0.,
+                0.,
+                -1.,
+                0., //row 4
+            ],
+            rows: 4,
+            cols: 4,
+        }
+    }
 }
 
 // Unary Ops

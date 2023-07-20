@@ -20,7 +20,7 @@ impl VertexAttrib {
     ) -> VertexAttrib {
         unsafe {
             gl::VertexAttribPointer(index, size, type_, normalized, stride, pointer);
-            gl::EnableVertexAttribArray(index)
+            gl::EnableVertexAttribArray(index);
         }
 
         VertexAttrib { index }
