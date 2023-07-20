@@ -139,6 +139,10 @@ impl Vector {
     pub fn as_matrix(&self) -> Matrix {
         Matrix::from_vector(self)
     }
+
+    pub fn as_ptr(&self) -> *const f32 {
+        self.data.as_ptr()
+    }
 }
 
 // Unary Ops

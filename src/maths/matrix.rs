@@ -143,6 +143,10 @@ impl Matrix {
         assert_eq!(self.cols(), 1);
         Vector::from_vec(self.data.clone())
     }
+
+    pub fn as_ptr(&self) -> *const f32 {
+        self.data.as_ptr()
+    }
 }
 
 //Custom matrices
@@ -164,13 +168,12 @@ impl Matrix {
         }
     }
 
-    pub fn scaling(values: Vector) -> Self {
-        assert_eq!(values.len(), 3);
+    pub fn scaling(values: (f32, f32, f32)) -> Self {
         Self {
             data: vec![
-                values[0], 0., 0., 0., //row 1
-                0., values[1], 0., 0., //row 2
-                0., 0., values[2], 0., //row 3
+                values.0, 0., 0., 0., //row 1
+                0., values.1, 0., 0., //row 2
+                0., 0., values.2, 0., //row 3
                 0., 0., 0., 1., //row 4
             ],
             rows: 4,
@@ -178,18 +181,21 @@ impl Matrix {
         }
     }
 
-    pub fn translation(values: Vector) -> Self {
-        assert_eq!(values.len(), 3);
+    pub fn translation(values: (f32, f32, f32)) -> Self {
         Self {
             data: vec![
-                1., 0., 0., values[0], //row 1
-                0., 1., 0., values[1], //row 2
-                0., 0., 1., values[2], //row 3
+                1., 0., 0., values.0, //row 1
+                0., 1., 0., values.1, //row 2
+                0., 0., 1., values.2, //row 3
                 0., 0., 0., 1., //row 4
             ],
             rows: 4,
             cols: 4,
         }
+    }
+
+    pub fn rotation(values: (f32, f32, f32)) -> Self {
+        Self::rotation_z(values.2) * Self::rotation_y(values.1) * Self::rotation_x(values.0)
     }
 
     pub fn rotation_x(angle: f32) -> Self {

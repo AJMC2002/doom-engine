@@ -3,13 +3,13 @@ use std::{collections::HashMap, ffi::CString, fs::File, io::Read, ptr};
 use egui_glfw_gl::gl;
 use egui_glfw_gl::gl::types::*;
 
-use crate::maths::Vector;
+use crate::maths::{Matrix, Vector};
 
 use super::texture::Texture2D;
 
 pub struct ShaderProgram {
     id: GLuint,
-    uniform_ids: HashMap<String, GLint>,
+    location_cache: HashMap<String, GLint>,
 }
 
 impl ShaderProgram {
@@ -49,7 +49,7 @@ impl ShaderProgram {
 
             ShaderProgram {
                 id,
-                uniform_ids: HashMap::new(),
+                location_cache: HashMap::new(),
             }
         }
     }
@@ -66,9 +66,8 @@ impl ShaderProgram {
         }
     }
 
-    pub fn uniform_4f(&mut self, name: &str, v: Vector) {
-        assert!(v.len() == 4);
-        let location = match self.uniform_ids.get(&name.to_string()) {
+    fn get_location(&mut self, name: &str) -> GLint {
+        match self.location_cache.get(&name.to_string()) {
             Some(id) => *id,
             None => {
                 let name_cstring = CString::new(name).unwrap();
@@ -76,31 +75,38 @@ impl ShaderProgram {
                 if loc < 0 {
                     panic!("Cannot locate uniform: {}", name);
                 } else {
-                    self.uniform_ids.insert(name.to_string(), loc);
+                    self.location_cache.insert(name.to_string(), loc);
                 }
                 loc
             }
-        };
+        }
+    }
+
+    pub fn uniform_4f(&mut self, name: &str, v1: f32, v2: f32, v3: f32, v4: f32) {
         unsafe {
-            gl::Uniform4f(location, v[0], v[1], v[2], v[3]);
+            gl::Uniform4f(self.get_location(name), v1, v2, v3, v4);
+        }
+    }
+
+    pub fn uniform_4fv(&mut self, name: &str, v: Vector) {
+        assert_eq!(v.len(), 4);
+        unsafe {
+            gl::Uniform4fv(self.get_location(name), 1, v.as_ptr());
+        }
+    }
+
+    pub fn uniform_matrix_4fv(&mut self, name: &str, m: Matrix) {
+        assert_eq!(m.rows(), 4);
+        assert_eq!(m.cols(), 4);
+        unsafe {
+            //Matrix is a row-major matrix type, therefore we need to use
+            //transpose: gl::TRUE since OpenGL uses column-major matrices
+            gl::UniformMatrix4fv(self.get_location(name), 1, gl::TRUE, m.as_ptr());
         }
     }
 
     pub fn uniform_2dtex(&mut self, name: &str, tex: &Texture2D) {
-        match self.uniform_ids.get(&name.to_string()) {
-            Some(id) => *id,
-            None => {
-                let name_cstring = CString::new(name).unwrap();
-                let loc = unsafe { gl::GetUniformLocation(self.id, name_cstring.as_ptr()) };
-                if loc < 0 {
-                    panic!("Cannot locate uniform: {}", name);
-                } else {
-                    self.uniform_ids.insert(name.to_string(), loc);
-                }
-                loc
-            }
-        };
-
+        self.get_location(name);
         unsafe {
             tex.bind();
             gl::ActiveTexture(gl::TEXTURE0);
