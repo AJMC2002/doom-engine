@@ -1,9 +1,11 @@
 use doom_engine::graphics::{wrapper::*, Window};
+use doom_engine::maths::*;
 use doom_engine::vector;
 use egui_glfw_gl::egui;
 use egui_glfw_gl::egui::{vec2, Pos2, Rect};
 use egui_glfw_gl::gl;
 use egui_glfw_gl::gl::types::*;
+use std::f32::consts::PI;
 use std::{mem, os::raw::c_void, ptr};
 
 static WIDTH: u32 = 1080;
@@ -28,8 +30,8 @@ fn main() {
     });
 
     let mut shader_program = ShaderProgram::new(
-        "resources/shaders/basic/basic.vs",
-        "resources/shaders/basic/basic.fs",
+        "resources/shaders/basic/basic.vert",
+        "resources/shaders/basic/basic.frag",
     );
 
     let texture = Texture2D::new("resources/textures/cat.jpg");
@@ -66,36 +68,19 @@ fn main() {
         (3 * mem::size_of::<GLfloat>()) as *const c_void,
     );
 
-    let mut camera_position = (
-        0.0.to_string().to_owned(),
-        0.0.to_string().to_owned(),
-        0.0.to_string().to_owned(),
+    let mut scale = (
+        1.0.to_string().to_owned(),
+        1.0.to_string().to_owned(),
+        1.0.to_string().to_owned(),
     );
-    let mut camera_up = (
-        0.0.to_string().to_owned(),
-        0.0.to_string().to_owned(),
-        0.0.to_string().to_owned(),
-    );
-    let mut camera_center = (
+    let mut rotate = (0.0, 0.0, 0.0);
+    let mut translate = (
         0.0.to_string().to_owned(),
         0.0.to_string().to_owned(),
         0.0.to_string().to_owned(),
     );
 
     while !window.window_handle().should_close() {
-        let mut camera_update = false;
-        let mut camera_reset = false;
-        let (width, height) = window.window_handle().get_size();
-        let native_pixels_per_point = window.window_handle().get_content_scale().0;
-
-        egui_input_state.input.time = Some(window.glfw_handle().get_time());
-        egui_ctx.begin_frame(egui_input_state.input.take());
-        egui_input_state.input.screen_rect = Some(Rect::from_min_size(
-            Pos2::new(0f32, 0f32),
-            vec2(width as f32, height as f32) / native_pixels_per_point,
-        ));
-        egui_input_state.input.pixels_per_point = Some(native_pixels_per_point);
-
         unsafe {
             gl::ClearColor(154. / 258., 127. / 258., 174. / 258., 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT);
@@ -110,56 +95,84 @@ fn main() {
             _pos_attrib.enable();
             _tex_attrib.enable();
             texture.bind();
-            shader_program.uniform_4f(
+            shader_program.uniform_4fv(
                 "globalColor",
                 vector![1.0 - color, color, color.powi(2), 1.0],
+            );
+            shader_program.uniform_matrix_4fv(
+                "trans",
+                Matrix::translation((
+                    translate.0.parse::<f32>().unwrap_or(0.0),
+                    translate.1.parse::<f32>().unwrap_or(0.0),
+                    translate.2.parse::<f32>().unwrap_or(0.0),
+                )) * Matrix::rotation(rotate)
+                    * Matrix::scaling((
+                        scale.0.parse::<f32>().unwrap_or(0.0),
+                        scale.1.parse::<f32>().unwrap_or(0.0),
+                        scale.2.parse::<f32>().unwrap_or(0.0),
+                    )),
             );
             shader_program.uniform_2dtex("myTex", &texture);
 
             gl::DrawElements(gl::TRIANGLES, 6, gl::UNSIGNED_INT, ptr::null());
         }
 
-        egui::Window::new("Control").show(&egui_ctx, |ui| {
+        let (width, height) = window.window_handle().get_size();
+        let native_pixels_per_point = window.window_handle().get_content_scale().0;
+
+        egui_input_state.input.time = Some(window.glfw_handle().get_time());
+        egui_ctx.begin_frame(egui_input_state.input.take());
+        egui_input_state.input.screen_rect = Some(Rect::from_min_size(
+            Pos2::new(0f32, 0f32),
+            vec2(width as f32, height as f32) / native_pixels_per_point,
+        ));
+        egui_input_state.input.pixels_per_point = Some(native_pixels_per_point);
+
+        egui::Window::new("Quad").show(&egui_ctx, |ui| {
             ui.set_max_width(280.0);
             ui.group(|ui| {
-                ui.label("camera");
                 ui.horizontal(|ui| {
-                    ui.set_max_width(250.0);
-                    ui.label("position");
-                    ui.label("x:");
-                    ui.add(egui::TextEdit::singleline(&mut camera_position.0).desired_width(30.0));
-                    ui.label("y:");
-                    ui.add(egui::TextEdit::singleline(&mut camera_position.1).desired_width(30.0));
-                    ui.label("z:");
-                    ui.add(egui::TextEdit::singleline(&mut camera_position.2).desired_width(30.0));
+                    ui.label("time");
+                    ui.label(window.glfw_handle().get_time().to_string());
+                    ui.label("s.");
                 });
                 ui.horizontal(|ui| {
                     ui.set_max_width(250.0);
-                    ui.label("center");
+                    ui.label("scale");
                     ui.label("x:");
-                    ui.add(egui::TextEdit::singleline(&mut camera_center.0).desired_width(30.0));
+                    ui.add(egui::TextEdit::singleline(&mut scale.0).desired_width(30.0));
                     ui.label("y:");
-                    ui.add(egui::TextEdit::singleline(&mut camera_center.1).desired_width(30.0));
+                    ui.add(egui::TextEdit::singleline(&mut scale.1).desired_width(30.0));
                     ui.label("z:");
-                    ui.add(egui::TextEdit::singleline(&mut camera_center.2).desired_width(30.0));
+                    ui.add(egui::TextEdit::singleline(&mut scale.2).desired_width(30.0));
+                });
+                ui.horizontal(|ui| {
+                    ui.label("rotate");
+                    ui.vertical(|ui| {
+                        ui.horizontal(|ui| {
+                            ui.label("x");
+                            ui.add(egui::Slider::new(&mut rotate.0, 0.0..=(2.0 * PI)));
+                        });
+                        ui.horizontal(|ui| {
+                            ui.label("y");
+                            ui.add(egui::Slider::new(&mut rotate.1, 0.0..=(2.0 * PI)));
+                        });
+
+                        ui.horizontal(|ui| {
+                            ui.label("z");
+                            ui.add(egui::Slider::new(&mut rotate.2, 0.0..=(2.0 * PI)));
+                        });
+                    })
                 });
                 ui.horizontal(|ui| {
                     ui.set_max_width(250.0);
-                    ui.label("up");
+                    ui.label("translate");
                     ui.label("x:");
-                    ui.add(egui::TextEdit::singleline(&mut camera_up.0).desired_width(30.0));
+                    ui.add(egui::TextEdit::singleline(&mut translate.0).desired_width(30.0));
                     ui.label("y:");
-                    ui.add(egui::TextEdit::singleline(&mut camera_up.1).desired_width(30.0));
+                    ui.add(egui::TextEdit::singleline(&mut translate.1).desired_width(30.0));
                     ui.label("z:");
-                    ui.add(egui::TextEdit::singleline(&mut camera_up.2).desired_width(30.0));
-                });
-                ui.horizontal(|ui| {
-                    if ui.button("update").clicked() {
-                        camera_update = true;
-                    }
-                    if ui.button("reset").clicked() {
-                        camera_reset = true;
-                    }
+                    ui.add(egui::TextEdit::singleline(&mut translate.2).desired_width(30.0));
                 });
             });
         });
