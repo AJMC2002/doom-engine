@@ -1,7 +1,7 @@
-use std::ffi::CStr;
 use egui_glfw::EguiBackend;
 use gl::types::*;
 use glfw::{self, Action, Context, Key, WindowEvent};
+use std::ffi::CStr;
 use std::os::raw::c_void;
 use std::ptr;
 use std::sync::mpsc::Receiver;
@@ -147,24 +147,12 @@ extern "system" fn debug_callback(
     message: *const GLchar,
     _user_param: *mut c_void,
 ) {
-    unsafe {
-        println!(
-            "GL CALLBACK: {} type = {}, severity = {}, message = {}",
-            match gltype {
-                gl::DEBUG_TYPE_ERROR => "** GL ERROR **",
-                _ => ""
-            },
-            CStr::from_ptr(gl::GetString(gltype) as _).to_str().expect("Failed to convert debug GL type to String"),
-            CStr::from_ptr(gl::GetString(severity) as _).to_str().expect("Failed to convert debug severity to String"),
-            CStr::from_ptr(message as _).to_str().expect("Failed to convert debug message to String")
-        )
-    }
-    // println!(
-    //     "OpenGL Debug Message: source={}, type={}, id={}, severity={}, message={}",
-    //     source,
-    //     gltype,
-    //     id,
-    //     severity,
-    //     unsafe { std::ffi::CStr::from_ptr(message).to_str().unwrap() }
-    // );
+    println!(
+        "OpenGL Debug Message: source={}, type={}, id={}, severity={}, message={}",
+        source,
+        gltype,
+        id,
+        severity,
+        unsafe { CStr::from_ptr(message).to_str().unwrap() }
+    );
 }

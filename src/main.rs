@@ -89,7 +89,7 @@ fn main() {
         {
             t = window.glfw_handle().get_time() as f32;
 
-            shader_program.bind();
+            // shader_program.bind();
             // _pos_attrib.enable();
             // _tex_attrib.enable();
             _vao.bind();
@@ -108,17 +108,17 @@ fn main() {
                 "model",
                 &(Matrix::translation((0., 0.5 * (1.5 * t).sin(), 0.))
                     * Matrix::translation((
-                    translate.0.parse::<f32>().unwrap_or(0.0),
-                    translate.1.parse::<f32>().unwrap_or(0.0),
-                    translate.2.parse::<f32>().unwrap_or(0.0),
-                ))
+                        translate.0.parse::<f32>().unwrap_or(0.0),
+                        translate.1.parse::<f32>().unwrap_or(0.0),
+                        translate.2.parse::<f32>().unwrap_or(0.0),
+                    ))
                     * Matrix::rotation((0.12, t, 0.))
                     * Matrix::rotation(rotate)
                     * Matrix::scaling((
-                    scale.0.parse::<f32>().unwrap_or(0.0),
-                    scale.1.parse::<f32>().unwrap_or(0.0),
-                    scale.2.parse::<f32>().unwrap_or(0.0),
-                ))),
+                        scale.0.parse::<f32>().unwrap_or(0.0),
+                        scale.1.parse::<f32>().unwrap_or(0.0),
+                        scale.2.parse::<f32>().unwrap_or(0.0),
+                    ))),
             );
 
             texture_gato.bind();
@@ -130,17 +130,17 @@ fn main() {
                 "model",
                 &(Matrix::translation(((2. * t).sin(), 0., (2. * t).cos()))
                     * Matrix::translation((
-                    translate.0.parse::<f32>().unwrap_or(0.0),
-                    translate.1.parse::<f32>().unwrap_or(0.0),
-                    translate.2.parse::<f32>().unwrap_or(0.0),
-                ))
+                        translate.0.parse::<f32>().unwrap_or(0.0),
+                        translate.1.parse::<f32>().unwrap_or(0.0),
+                        translate.2.parse::<f32>().unwrap_or(0.0),
+                    ))
                     * Matrix::rotation((0.12, 2. * PI * t, 0.))
                     * Matrix::rotation(rotate)
                     * Matrix::scaling((
-                    scale.0.parse::<f32>().unwrap_or(0.0),
-                    scale.1.parse::<f32>().unwrap_or(0.0),
-                    scale.2.parse::<f32>().unwrap_or(0.0),
-                ))),
+                        scale.0.parse::<f32>().unwrap_or(0.0),
+                        scale.1.parse::<f32>().unwrap_or(0.0),
+                        scale.2.parse::<f32>().unwrap_or(0.0),
+                    ))),
             );
 
             texture_gatorrito.bind();
@@ -152,17 +152,17 @@ fn main() {
                 "model",
                 &(Matrix::translation((0.2 * (t).sin(), (2. * t).sin(), (2. * t).cos()))
                     * Matrix::translation((
-                    translate.0.parse::<f32>().unwrap_or(0.0),
-                    translate.1.parse::<f32>().unwrap_or(0.0),
-                    translate.2.parse::<f32>().unwrap_or(0.0),
-                ))
+                        translate.0.parse::<f32>().unwrap_or(0.0),
+                        translate.1.parse::<f32>().unwrap_or(0.0),
+                        translate.2.parse::<f32>().unwrap_or(0.0),
+                    ))
                     * Matrix::rotation((0.12, 2. * PI * t, 0.))
                     * Matrix::rotation(rotate)
                     * Matrix::scaling((
-                    scale.0.parse::<f32>().unwrap_or(0.0),
-                    scale.1.parse::<f32>().unwrap_or(0.0),
-                    scale.2.parse::<f32>().unwrap_or(0.0),
-                ))),
+                        scale.0.parse::<f32>().unwrap_or(0.0),
+                        scale.1.parse::<f32>().unwrap_or(0.0),
+                        scale.2.parse::<f32>().unwrap_or(0.0),
+                    ))),
             );
 
             texture_pog.bind();
