@@ -1,7 +1,6 @@
 use std::{collections::HashMap, ffi::CString, fs::File, io::Read, ptr};
 
-use egui_glfw_gl::gl;
-use egui_glfw_gl::gl::types::*;
+use gl::types::*;
 
 use crate::maths::{Matrix, Vector};
 
@@ -95,7 +94,7 @@ impl ShaderProgram {
         }
     }
 
-    pub fn uniform_matrix_4fv(&mut self, name: &str, m: Matrix) {
+    pub fn uniform_matrix_4fv(&mut self, name: &str, m: &Matrix) {
         assert_eq!(m.rows(), 4);
         assert_eq!(m.cols(), 4);
         unsafe {
@@ -108,8 +107,9 @@ impl ShaderProgram {
     pub fn uniform_2dtex(&mut self, name: &str, tex: &Texture2D) {
         self.get_location(name);
         unsafe {
-            tex.bind();
+            //que se joda el que hizo opengl
             gl::ActiveTexture(gl::TEXTURE0);
+            tex.bind();
         }
     }
 }

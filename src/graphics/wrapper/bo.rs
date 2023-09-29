@@ -1,11 +1,10 @@
 use std::mem;
 
-use egui_glfw_gl::gl;
-use egui_glfw_gl::gl::types::*;
+use gl::types::*;
 
 // Buffer Object
 pub trait BO<Ty> {
-    fn new(usage: GLenum, data: Box<[Ty]>) -> Self;
+    fn new(usage: GLenum, data: Vec<Ty>) -> Self;
     fn bind(&self);
     fn unbind(&self);
     //fn store(&self);
@@ -19,7 +18,7 @@ pub struct VBO {
 }
 
 impl BO<f32> for VBO {
-    fn new(usage: GLenum, data: Box<[f32]>) -> VBO {
+    fn new(usage: GLenum, data: Vec<f32>) -> VBO {
         let mut id = 0;
         unsafe {
             gl::GenBuffers(1, &mut id);
@@ -60,7 +59,7 @@ pub struct EBO {
 }
 
 impl BO<i32> for EBO {
-    fn new(usage: GLenum, data: Box<[i32]>) -> EBO {
+    fn new(usage: GLenum, data: Vec<i32>) -> EBO {
         let mut id = 0;
         unsafe {
             gl::GenBuffers(1, &mut id);

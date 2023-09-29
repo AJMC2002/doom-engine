@@ -273,6 +273,20 @@ impl Matrix {
         }
     }
 
+    pub fn model(
+        scaling_values: (f32, f32, f32),
+        rotation_values: (f32, f32, f32),
+        translation_values: (f32, f32, f32),
+    ) -> Self {
+        Self::scaling(scaling_values)
+            * Self::rotation(rotation_values)
+            * Self::translation(translation_values)
+    }
+
+    pub fn model_default() -> Self {
+        Self::model((1., 1., 1.), (0., 0., 0.), (0., 0., 0.))
+    }
+
     pub fn projection_orthographic(
         left: f32,
         right: f32,

@@ -1,5 +1,4 @@
-use egui_glfw_gl::gl;
-use egui_glfw_gl::gl::types::*;
+use gl::types::*;
 
 // Vertex Array Object
 pub struct VAO {
