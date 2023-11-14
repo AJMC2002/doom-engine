@@ -2,6 +2,7 @@ use doom_engine::graphics::mesh::Cube;
 use doom_engine::graphics::{wrapper::*, Window};
 use doom_engine::maths::*;
 use doom_engine::{matrix, vector};
+use egui::{Align2, RichText};
 use egui_glfw::egui;
 use gl::types::*;
 use std::error::Error;
@@ -189,15 +190,15 @@ fn main() -> Result<(), Box<dyn Error>> {
         ],
     );
     let cube_pos = [
-        (2.0, 5.0, -15.0),
-        (-1.5, -2.2, -2.5),
-        (-3.8, -2.0, -12.3),
-        (2.4, -0.4, -3.5),
-        (-1.7, 3.0, -7.5),
-        (1.3, -2.0, -2.5),
-        (1.5, 2.0, -2.5),
-        (1.5, 0.2, -1.5),
-        (-1.3, 1.0, -1.5),
+        vector!(2.0, 5.0, -15.0),
+        vector!(-1.5, -2.2, -2.5),
+        vector!(-3.8, -2.0, -12.3),
+        vector!(2.4, -0.4, -3.5),
+        vector!(-1.7, 3.0, -7.5),
+        vector!(1.3, -2.0, -2.5),
+        vector!(1.5, 2.0, -2.5),
+        vector!(1.5, 0.2, -1.5),
+        vector!(-1.3, 1.0, -1.5),
     ];
 
     let stride = 8 * mem::size_of::<GLfloat>() as GLsizei;
@@ -252,12 +253,12 @@ fn main() -> Result<(), Box<dyn Error>> {
         "resources/shaders/light.frag",
     );
 
-    let light_pos = vector![2.5, 1.0, 2.0];
     let mut light = Cube::new(
-        Some(
-            Matrix::translation((light_pos[0], light_pos[1], light_pos[2]))
-                * Matrix::scaling((0.2, 0.2, 0.2)),
-        ),
+        Some((
+            Matrix::translation(vector![2.5, 1.0, 2.0]),
+            Matrix::identity(4),
+            Matrix::scaling(vector![0.2, 0.2, 0.2]),
+        )),
         None,
         None,
     );
@@ -283,11 +284,11 @@ fn main() -> Result<(), Box<dyn Error>> {
             shader_program.uniform_matrix_4fv("view", &window.camera_handle().view());
             shader_program.uniform_3fv("color", &vector![1.0, 1.0, 1.0]);
             shader_program.uniform_3fv("light_color", &vector![1.0, 1.0, 1.0]);
-            shader_program.uniform_3fv("light_pos", &light_pos);
+            shader_program.uniform_3fv("light_pos", &light.pos());
             shader_program.uniform_3fv("view_pos", &window.camera_handle().pos());
 
             cube_pos.iter().for_each(|pos| {
-                let m = Matrix::translation(*pos)
+                let m = Matrix::translation(pos.clone())
                      //* Matrix::translation((
                      //    translate.0.parse::<f32>().unwrap_or(0.0),
                      //    translate.1.parse::<f32>().unwrap_or(0.0),
@@ -395,7 +396,18 @@ fn main() -> Result<(), Box<dyn Error>> {
                 },
             );
 
-            egui::Window::new("Quad").show(&window.ui_handle().get_egui_ctx().to_owned(), |ui| {
+            if window.is_camera_still() {
+                egui::Window::new("")
+                    .title_bar(false)
+                    .collapsible(false)
+                    .resizable(false)
+                    .anchor(Align2::RIGHT_TOP, (0.0, 0.0))
+                    .show(&window.ui_handle().get_egui_ctx().to_owned(), |ui| {
+                        ui.label(RichText::new("Camera rotation is set still.").size(15.0))
+                    });
+            }
+
+            egui::Window::new("Light").show(&window.ui_handle().get_egui_ctx().to_owned(), |ui| {
                 ui.set_max_width(280.0);
                 ui.group(|ui| {
                     ui.horizontal(|ui| {
@@ -403,44 +415,25 @@ fn main() -> Result<(), Box<dyn Error>> {
                         ui.label(window.glfw_handle().get_time().to_string());
                         ui.label("s.");
                     });
+                    let mut light_pos = light.pos();
                     ui.horizontal(|ui| {
-                        ui.set_max_width(250.0);
-                        ui.label("scale");
-                        ui.label("x:");
-                        ui.add(egui::TextEdit::singleline(&mut scale.0).desired_width(30.0));
-                        ui.label("y:");
-                        ui.add(egui::TextEdit::singleline(&mut scale.1).desired_width(30.0));
-                        ui.label("z:");
-                        ui.add(egui::TextEdit::singleline(&mut scale.2).desired_width(30.0));
-                    });
-                    ui.horizontal(|ui| {
-                        ui.label("rotate");
+                        ui.label("light_pos");
                         ui.vertical(|ui| {
                             ui.horizontal(|ui| {
                                 ui.label("x");
-                                ui.add(egui::Slider::new(&mut rotate.0, 0.0..=(2.0 * PI)));
+                                ui.add(egui::Slider::new(&mut light_pos[0], -15.0..=15.0));
                             });
                             ui.horizontal(|ui| {
                                 ui.label("y");
-                                ui.add(egui::Slider::new(&mut rotate.1, 0.0..=(2.0 * PI)));
+                                ui.add(egui::Slider::new(&mut light_pos[1], -15.0..=15.0));
                             });
-
                             ui.horizontal(|ui| {
                                 ui.label("z");
-                                ui.add(egui::Slider::new(&mut rotate.2, 0.0..=(2.0 * PI)));
+                                ui.add(egui::Slider::new(&mut light_pos[2], -15.0..=15.0));
                             });
                         })
                     });
-                    ui.horizontal(|ui| {
-                        ui.set_max_width(250.0);
-                        ui.label("translate");
-                        ui.label("x:");
-                        ui.add(egui::TextEdit::singleline(&mut translate.0).desired_width(30.0));
-                        ui.label("y:");
-                        ui.add(egui::TextEdit::singleline(&mut translate.1).desired_width(30.0));
-                        ui.label("z:");
-                        ui.add(egui::TextEdit::singleline(&mut translate.2).desired_width(30.0));
-                    });
+                    light.set_pos(light_pos);
                 });
             });
 

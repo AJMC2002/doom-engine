@@ -102,6 +102,10 @@ impl Window {
         &self.camera
     }
 
+    pub fn is_camera_still(&self) -> bool {
+        self.window.get_cursor_mode() == glfw::CursorMode::Normal
+    }
+
     pub fn time_delta(&self) -> f64 {
         self.time_delta
     }
@@ -148,17 +152,26 @@ impl Window {
             match event {
                 WindowEvent::CursorPos(x, y) => {
                     let (last_x, last_y) = self.last_pos;
-                    self.camera.cursor_pos_callback(x - last_x, last_y - y);
+                    if !self.is_camera_still() {
+                        self.camera.cursor_pos_callback(x - last_x, last_y - y);
+                    }
                     self.last_pos = (x, y);
                 }
                 WindowEvent::FramebufferSize(width, height) => unsafe {
                     gl::Viewport(0, 0, width, height)
                 },
                 WindowEvent::Key(Key::Escape, _, Action::Press, _) => {
-                    self.window.set_should_close(true)
+                    match self.window.get_cursor_mode() {
+                        glfw::CursorMode::Disabled => {
+                            self.window.set_cursor_mode(glfw::CursorMode::Normal)
+                        }
+                        _ => self.window.set_cursor_mode(glfw::CursorMode::Disabled),
+                    }
                 }
                 WindowEvent::Scroll(x_offset, y_offset) => {
-                    self.camera.scroll_callback(x_offset, y_offset)
+                    if !self.is_camera_still() {
+                        self.camera.scroll_callback(x_offset, y_offset)
+                    }
                 }
                 //egui bindings
                 glfw::WindowEvent::Key(

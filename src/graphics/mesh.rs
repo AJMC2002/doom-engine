@@ -7,7 +7,7 @@ use std::{
 use gl::types::{GLfloat, GLsizei};
 use obj::Obj;
 
-use crate::maths::Matrix;
+use crate::maths::{Matrix, Vector};
 
 use super::{
     camera::Camera,
@@ -15,17 +15,19 @@ use super::{
 };
 
 pub struct Cube<'a> {
-    model: Matrix,
+    translation: Matrix,
+    rotation: Matrix,
+    scaling: Matrix,
     vao: VAO,
     vbo: VBO,
     ebo: EBO,
-    attrib:VertexAttrib,
+    attrib: VertexAttrib,
     texture: Option<&'a Texture2D>,
 }
 
 impl<'a> Cube<'a> {
     pub fn new(
-        model: Option<Matrix>,
+        model_matrices: Option<(Matrix, Matrix, Matrix)>,
         texture: Option<&'a Texture2D>,
         tex_coords: Option<Vec<f32>>,
     ) -> Self {
@@ -83,14 +85,40 @@ impl<'a> Cube<'a> {
         vbo.unbind();
         vao.unbind();
 
+        let (t, r, s) = model_matrices.unwrap_or((
+            Matrix::identity(4),
+            Matrix::identity(4),
+            Matrix::identity(4),
+        ));
+
         Cube {
-            model: model.unwrap_or(Matrix::model_default()),
+            translation: t,
+            rotation: r,
+            scaling: s,
             vao,
             vbo,
             ebo,
             attrib,
             texture,
         }
+    }
+
+    pub fn set_pos(&mut self, pos: Vector) {
+        self.translation = Matrix::translation(pos)
+    }
+
+    pub fn translate(&mut self, v: Vector) {
+        self.translation = &self.translation * Matrix::translation(v);
+    }
+
+    pub fn model(&self) -> Matrix {
+        &self.scaling * &self.rotation * &self.translation
+    }
+
+    pub fn pos(&self) -> Vector {
+        let mut p = self.translation.clone().col(3);
+        p.pop();
+        p.into()
     }
 
     pub fn draw(&mut self, camera: &Camera, shader: &mut ShaderProgram) {
@@ -101,7 +129,7 @@ impl<'a> Cube<'a> {
         self.attrib.enable();
         shader.uniform_matrix_4fv("proj", &camera.proj());
         shader.uniform_matrix_4fv("view", &camera.view());
-        shader.uniform_matrix_4fv("model", &self.model);
+        shader.uniform_matrix_4fv("model", &self.model());
         unsafe { gl::DrawElements(gl::TRIANGLES, 36, gl::UNSIGNED_INT, ptr::null()) }
         self.attrib.disable();
         self.ebo.unbind();

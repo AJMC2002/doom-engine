@@ -187,12 +187,13 @@ impl Matrix {
         }
     }
 
-    pub fn scaling(values: (f32, f32, f32)) -> Self {
+    pub fn scaling(values: Vector) -> Self {
+        assert_eq!(values.len(), 3);
         Self {
             data: vec![
-                values.0, 0., 0., 0., //row 1
-                0., values.1, 0., 0., //row 2
-                0., 0., values.2, 0., //row 3
+                values[0], 0., 0., 0., //row 1
+                0., values[1], 0., 0., //row 2
+                0., 0., values[2], 0., //row 3
                 0., 0., 0., 1., //row 4
             ],
             rows: 4,
@@ -200,12 +201,13 @@ impl Matrix {
         }
     }
 
-    pub fn translation(values: (f32, f32, f32)) -> Self {
+    pub fn translation(values: Vector) -> Self {
+        assert_eq!(values.len(), 3);
         Self {
             data: vec![
-                1., 0., 0., values.0, //row 1
-                0., 1., 0., values.1, //row 2
-                0., 0., 1., values.2, //row 3
+                1., 0., 0., values[0], //row 1
+                0., 1., 0., values[1], //row 2
+                0., 0., 1., values[2], //row 3
                 0., 0., 0., 1., //row 4
             ],
             rows: 4,
@@ -213,8 +215,9 @@ impl Matrix {
         }
     }
 
-    pub fn rotation(values: (f32, f32, f32)) -> Self {
-        Self::rotation_z(values.2) * Self::rotation_y(values.1) * Self::rotation_x(values.0)
+    pub fn rotation(values: Vector) -> Self {
+        assert_eq!(values.len(), 3);
+        Self::rotation_z(values[2]) * Self::rotation_y(values[1]) * Self::rotation_x(values[0])
     }
 
     pub fn rotation_x(angle: f32) -> Self {
@@ -293,9 +296,9 @@ impl Matrix {
     }
 
     pub fn model(
-        translation_values: (f32, f32, f32),
-        rotation_values: (f32, f32, f32),
-        scaling_values: (f32, f32, f32),
+        translation_values: Vector,
+        rotation_values: Vector,
+        scaling_values: Vector,
     ) -> Self {
         Self::translation(translation_values)
             * Self::rotation(rotation_values)
@@ -405,7 +408,7 @@ impl Matrix {
             ],
             rows: 4,
             cols: 4,
-        } * Self::translation((-position[0], -position[1], -position[2]))
+        } * Self::translation(-position)
     }
 }
 
