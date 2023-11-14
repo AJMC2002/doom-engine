@@ -33,8 +33,6 @@ impl Window {
             .create_window(width, height, title, glfw::WindowMode::Windowed)
             .expect("Failed to create GLFW window!");
 
-        window.make_current();
-
         window.set_key_polling(true);
         window.set_cursor_pos_polling(true);
         window.set_mouse_button_polling(true);
@@ -47,10 +45,13 @@ impl Window {
         window.set_cursor_pos(last_pos.0, last_pos.1);
         window.set_sticky_keys(true);
 
-        glfw.set_swap_interval(glfw::SwapInterval::Sync(1));
+        window.make_current();
 
         gl::load_with(|symbol| window.get_proc_address(symbol) as *const _);
+
         gl::Viewport::load_with(|symbol| window.get_proc_address(symbol) as *const _);
+
+        glfw.set_swap_interval(glfw::SwapInterval::Sync(1));
 
         unsafe {
             gl::Disable(gl::CULL_FACE);
@@ -105,6 +106,25 @@ impl Window {
         self.time_delta
     }
 
+    pub fn begin_ui(&mut self) {
+        self.ui.begin_frame(&self.window, &mut self.glfw)
+    }
+
+    pub fn end_ui(&mut self) {
+        let (w, h) = self.window.get_framebuffer_size();
+        let output = self.ui.end_frame((w as _, h as _));
+        if !output.platform_output.copied_text.is_empty() {
+            match copypasta_ext::try_context() {
+                Some(mut context) => context
+                    .set_contents(output.platform_output.copied_text)
+                    .unwrap(),
+                None => {
+                    eprintln!("enable to gather context for clipboard");
+                }
+            }
+        }
+    }
+
     pub fn update(&mut self) {
         self.glfw.poll_events();
         self.process_events();
@@ -140,40 +160,40 @@ impl Window {
                 WindowEvent::Scroll(x_offset, y_offset) => {
                     self.camera.scroll_callback(x_offset, y_offset)
                 }
-                // //egui bindings
-                // glfw::WindowEvent::Key(
-                //     glfw::Key::X,
-                //     _,
-                //     glfw::Action::Press,
-                //     glfw::Modifiers::Control,
-                // ) => {
-                //     self.ui.push_event(egui::Event::Cut);
-                // }
-                // glfw::WindowEvent::Key(
-                //     glfw::Key::C,
-                //     _,
-                //     glfw::Action::Press,
-                //     glfw::Modifiers::Control,
-                // ) => {
-                //     self.ui.push_event(egui::Event::Copy);
-                // }
-                // glfw::WindowEvent::Key(
-                //     glfw::Key::V,
-                //     _,
-                //     glfw::Action::Press,
-                //     glfw::Modifiers::Control,
-                // ) => {
-                //     let text = match copypasta_ext::try_context() {
-                //         Some(mut context) => Some(context.get_contents().unwrap()),
-                //         None => {
-                //             eprintln!("enable to gather context for clipboard");
-                //             None
-                //         }
-                //     };
-                //     if let Some(text) = text {
-                //         self.ui.push_event(egui::Event::Text(text));
-                //     }
-                // }
+                //egui bindings
+                glfw::WindowEvent::Key(
+                    glfw::Key::X,
+                    _,
+                    glfw::Action::Press,
+                    glfw::Modifiers::Control,
+                ) => {
+                    self.ui.push_event(egui::Event::Cut);
+                }
+                glfw::WindowEvent::Key(
+                    glfw::Key::C,
+                    _,
+                    glfw::Action::Press,
+                    glfw::Modifiers::Control,
+                ) => {
+                    self.ui.push_event(egui::Event::Copy);
+                }
+                glfw::WindowEvent::Key(
+                    glfw::Key::V,
+                    _,
+                    glfw::Action::Press,
+                    glfw::Modifiers::Control,
+                ) => {
+                    let text = match copypasta_ext::try_context() {
+                        Some(mut context) => Some(context.get_contents().unwrap()),
+                        None => {
+                            eprintln!("enable to gather context for clipboard");
+                            None
+                        }
+                    };
+                    if let Some(text) = text {
+                        self.ui.push_event(egui::Event::Text(text));
+                    }
+                }
                 _ => (),
             }
         }
@@ -187,23 +207,6 @@ impl Window {
                 e != gl::NO_ERROR
             } {
                 println!("ERROR - {:?}", e as GLenum)
-            }
-        }
-    }
-
-    pub fn render_ui(&mut self, render_ui: fn(egui::Context)) {
-        self.ui.begin_frame(&self.window, &mut self.glfw);
-        render_ui(self.ui.get_egui_ctx().to_owned());
-        let (w, h) = self.window.get_framebuffer_size();
-        let output = self.ui.end_frame((w as _, h as _));
-        if !output.platform_output.copied_text.is_empty() {
-            match copypasta_ext::try_context() {
-                Some(mut context) => context
-                    .set_contents(output.platform_output.copied_text)
-                    .unwrap(),
-                None => {
-                    eprintln!("enable to gather context for clipboard");
-                }
             }
         }
     }
