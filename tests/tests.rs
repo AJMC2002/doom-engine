@@ -17,7 +17,7 @@ mod tests {
 
         #[test]
         fn make_vector_from_vec() {
-            let a = Vector::from_vec(vec![1., 2., 3.]);
+            let a = Vector::from(vec![1., 2., 3.]);
             let b = vector![1., 2., 3.];
             assert_eq!(a, b);
         }

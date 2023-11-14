@@ -22,14 +22,14 @@ macro_rules! matrix {
 //Usual methods
 
 impl Matrix {
-    pub fn new(rows: usize, cols: usize, data: Vec<f32>) -> Matrix {
+    pub fn new(rows: usize, cols: usize, data: Vec<f32>) -> Self {
         assert_eq!(data.len(), rows * cols);
-        Matrix { data, rows, cols }
+        Self { data, rows, cols }
     }
 
-    pub fn identity(rows: usize, cols: usize) -> Self {
-        let mut m = Matrix::zeroes(rows, cols);
-        for i in 0..rows {
+    pub fn identity(size: usize) -> Self {
+        let mut m = Self::zeroes(size, size);
+        for i in 0..size {
             m[i][i] = 1.0;
         }
         m
@@ -58,7 +58,7 @@ impl Matrix {
     pub fn from_vec(data: Vec<Vec<f32>>) -> Self {
         let rows = data.len();
         let cols = data[0].len();
-        let mut m = Matrix::zeroes(rows, cols);
+        let mut m = Self::zeroes(rows, cols);
         for i in 0..rows {
             for j in 0..cols {
                 m[i][j] = data[i][j];
@@ -68,7 +68,7 @@ impl Matrix {
     }
 
     pub fn from_vector(data: &Vector) -> Self {
-        Matrix {
+        Self {
             data: data.as_slice().to_vec(),
             rows: data.len(),
             cols: 1,
@@ -89,17 +89,17 @@ impl Matrix {
 
     pub fn reshape(&self, new_rows: usize, new_cols: usize) -> Self {
         assert_eq!(self.rows * self.cols, new_rows * new_cols);
-        Matrix::new(new_rows, new_cols, self.data.clone())
+        Self::new(new_rows, new_cols, self.data.clone())
     }
 
-    pub fn transpose(&self) -> Matrix {
+    pub fn transpose(&self) -> Self {
         let mut data = vec![0.0; self.rows * self.cols];
         for i in 0..self.rows {
             for j in 0..self.cols {
                 data[j * self.rows + i] = self[i][j];
             }
         }
-        Matrix::new(self.cols, self.rows, data)
+        Self::new(self.cols, self.rows, data)
     }
 
     pub fn remove_row(&mut self, i: usize) {
@@ -141,7 +141,7 @@ impl Matrix {
     ///Takes a column matrix and turns it into a vector
     pub fn as_vector(&self) -> Vector {
         assert_eq!(self.cols(), 1);
-        Vector::from_vec(self.data.clone())
+        Vector::from(self.data.clone())
     }
 
     pub fn as_ptr(&self) -> *const f32 {
@@ -274,17 +274,17 @@ impl Matrix {
     }
 
     pub fn model(
-        scaling_values: (f32, f32, f32),
-        rotation_values: (f32, f32, f32),
         translation_values: (f32, f32, f32),
+        rotation_values: (f32, f32, f32),
+        scaling_values: (f32, f32, f32),
     ) -> Self {
-        Self::scaling(scaling_values)
+        Self::translation(translation_values)
             * Self::rotation(rotation_values)
-            * Self::translation(translation_values)
+            * Self::scaling(scaling_values)
     }
 
     pub fn model_default() -> Self {
-        Self::model((1., 1., 1.), (0., 0., 0.), (0., 0., 0.))
+        Self::identity(4)
     }
 
     pub fn projection_orthographic(
@@ -320,14 +320,15 @@ impl Matrix {
     }
 
     pub fn projection_perspective(fov: f32, aspect: f32, near: f32, far: f32) -> Self {
+        let tan_of_half_fov = (fov / 2.).tan();
         Self {
             data: vec![
-                (fov / 2.).cos() / (aspect * (fov / 2.).sin()),
+                1. / (aspect * tan_of_half_fov),
                 0.,
                 0.,
                 0., //row 1
                 0.,
-                (fov / 2.).cos() / (fov / 2.).sin(),
+                1. / tan_of_half_fov,
                 0.,
                 0., //row 2
                 0.,
@@ -342,6 +343,40 @@ impl Matrix {
             rows: 4,
             cols: 4,
         }
+    }
+
+    /// position: Camera position
+    /// target: Target position
+    /// up: Up vector in world space
+    pub fn look_at(position: &Vector, target: &Vector, up: &Vector) -> Self {
+        assert_eq!(position.len(), 3);
+        assert_eq!(target.len(), 3);
+        assert_eq!(up.len(), 3);
+        let direction = (position - target).unit();
+        let cam_right = up.unit().cross(&direction).unit();
+        let cam_up = direction.cross(&cam_right);
+        Self {
+            data: vec![
+                cam_right[0],
+                cam_right[1],
+                cam_right[2],
+                0., //row 1
+                cam_up[0],
+                cam_up[1],
+                cam_up[2],
+                0., //row 2
+                direction[0],
+                direction[1],
+                direction[2],
+                0., //row 3
+                0.,
+                0.,
+                0.,
+                1., //row 4
+            ],
+            rows: 4,
+            cols: 4,
+        } * Self::translation((-position[0], -position[1], -position[2]))
     }
 }
 
@@ -544,5 +579,49 @@ impl Index<usize> for Matrix {
 impl IndexMut<usize> for Matrix {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         &mut self.data[index * self.cols..(index + 1) * self.cols]
+    }
+}
+
+// Conversions
+
+// - From
+
+impl From<&[&[f32]]> for Matrix {
+    fn from(value: &[&[f32]]) -> Self {
+        Self::from(value.iter().map(|v| v.to_vec()).collect::<Vec<Vec<f32>>>())
+    }
+}
+
+impl From<Vec<Vec<f32>>> for Matrix {
+    fn from(vec: Vec<Vec<f32>>) -> Self {
+        let rows = vec.len();
+        let cols = vec[0].len();
+        let mut m = Self::zeroes(rows, cols);
+        for i in 0..rows {
+            for j in 0..cols {
+                m[i][j] = vec[i][j];
+            }
+        }
+        m
+    }
+}
+
+impl From<Vector> for Matrix {
+    fn from(value: Vector) -> Self {
+        Self {
+            data: value.clone().into(),
+            rows: value.len(),
+            cols: 1,
+        }
+    }
+}
+
+impl From<&Vector> for Matrix {
+    fn from(value: &Vector) -> Self {
+        Self {
+            data: value.into(),
+            rows: value.len(),
+            cols: 1,
+        }
     }
 }

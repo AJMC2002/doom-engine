@@ -18,21 +18,21 @@ pub struct Vector {
 #[macro_export]
 macro_rules! vector {
     ( $( $x:expr ),* ) => {
-        $crate::maths::Vector::from_vec(vec![ $( $x ),* ])
+        $crate::maths::Vector::from(vec![ $( $x ),* ])
     };
 }
 
 impl Vector {
     pub fn new(n: usize, val: f32) -> Self {
-        Vector::from_vec(vec![val; n])
+        Vector::from(vec![val; n])
     }
 
-    pub fn zeroes(n: usize) {
-        Vector::from_vec(vec![0.; n]);
+    pub fn zeroes(n: usize) -> Self {
+        Vector::from(vec![0.; n])
     }
 
-    pub fn ones(n: usize) {
-        Vector::from_vec(vec![1.; n]);
+    pub fn ones(n: usize) -> Self {
+        Vector::from(vec![1.; n])
     }
 
     pub fn len(&self) -> usize {
@@ -58,10 +58,10 @@ impl Vector {
     pub fn cross(&self, other: &Vector) -> Self {
         assert_eq!(self.len(), 3);
         assert_eq!(other.len(), 3);
-        Vector::from_vec(vec![
-            self[1] * other[2] + self[2] * other[1],
-            self[2] * other[0] + self[0] * other[2],
-            self[0] * other[1] + self[1] * other[0],
+        Vector::from(vec![
+            self[1] * other[2] - self[2] * other[1],
+            self[2] * other[0] - self[0] * other[2],
+            self[0] * other[1] - self[1] * other[0],
         ])
     }
 
@@ -123,14 +123,6 @@ impl Vector {
     }
 
     // Conversion
-
-    pub fn from_vec(v: Vec<f32>) -> Self {
-        Self { data: v }
-    }
-
-    pub fn from_matrix(m: &Matrix) -> Self {
-        m.as_vector()
-    }
 
     pub fn as_slice(&self) -> &[f32] {
         &self.data
@@ -273,14 +265,33 @@ impl IndexMut<usize> for Vector {
     }
 }
 
-// Iterators
+// Conversions
 
-impl IntoIterator for Vector {
-    type Item = f32;
-    type IntoIter = std::vec::IntoIter<Self::Item>;
+// - From
 
-    fn into_iter(self) -> Self::IntoIter {
-        self.data.into_iter()
+impl From<&[f32]> for Vector {
+    fn from(value: &[f32]) -> Self {
+        Vector {
+            data: value.to_vec(),
+        }
+    }
+}
+
+impl From<Vec<f32>> for Vector {
+    fn from(value: Vec<f32>) -> Self {
+        Vector { data: value }
+    }
+}
+
+impl From<Matrix> for Vector {
+    fn from(value: Matrix) -> Self {
+        value.as_vector()
+    }
+}
+
+impl From<&Matrix> for Vector {
+    fn from(value: &Matrix) -> Self {
+        value.as_vector()
     }
 }
 
@@ -297,5 +308,37 @@ impl FromIterator<i32> for Vector {
         Vector {
             data: iter.into_iter().map(|x| x as f32).collect(),
         }
+    }
+}
+
+// - Into / Reverse From
+
+impl From<Vector> for Vec<f32> {
+    fn from(val: Vector) -> Self {
+        val.data
+    }
+}
+
+impl From<&Vector> for Vec<f32> {
+    fn from(val: &Vector) -> Self {
+        val.data.clone()
+    }
+}
+
+impl IntoIterator for Vector {
+    type Item = f32;
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.data.into_iter()
+    }
+}
+
+impl IntoIterator for &Vector {
+    type Item = f32;
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.data.clone().into_iter()
     }
 }

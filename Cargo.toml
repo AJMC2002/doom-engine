@@ -6,11 +6,13 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-egui = "0.22.0"
-glfw = "0.41.0"
+egui = "0.23.0"
+glfw = "0.53.0"
 gl = "0.14"
 copypasta-ext = "0.4.4"
-egui_glfw = { branch = "v0.4.0-release", git = "https://github.com/ishbosamiya/egui_glfw.git" }
+egui_glfw = { branch = "v0.6.0-release", git = "https://github.com/ishbosamiya/egui_glfw.git" }
 cgmath = "0.18.0"
 image = "0.24.6"
 impl_ops = "0.1.1"
+obj-rs = "0.7.1"
+tobj = "4.0.0"

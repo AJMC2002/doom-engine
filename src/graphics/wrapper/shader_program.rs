@@ -81,6 +81,13 @@ impl ShaderProgram {
         }
     }
 
+    pub fn uniform_3fv(&mut self, name: &str, v: Vector) {
+        assert_eq!(v.len(), 3);
+        unsafe {
+            gl::Uniform3fv(self.get_location(name), 1, v.as_ptr());
+        }
+    }
+
     pub fn uniform_4f(&mut self, name: &str, v1: f32, v2: f32, v3: f32, v4: f32) {
         unsafe {
             gl::Uniform4f(self.get_location(name), v1, v2, v3, v4);
