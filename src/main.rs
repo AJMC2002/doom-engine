@@ -145,18 +145,47 @@ fn main() -> Result<(), Box<dyn Error>> {
     let _vbo: VBO = BO::new(
         gl::STATIC_DRAW,
         vec![
-            -0.5, -0.5, -0.5, 0.0, 0.0, 0.5, -0.5, -0.5, 1.0, 0.0, 0.5, 0.5, -0.5, 1.0, 1.0, 0.5,
-            0.5, -0.5, 1.0, 1.0, -0.5, 0.5, -0.5, 0.0, 1.0, -0.5, -0.5, -0.5, 0.0, 0.0, -0.5, -0.5,
-            0.5, 0.0, 0.0, 0.5, -0.5, 0.5, 1.0, 0.0, 0.5, 0.5, 0.5, 1.0, 1.0, 0.5, 0.5, 0.5, 1.0,
-            1.0, -0.5, 0.5, 0.5, 0.0, 1.0, -0.5, -0.5, 0.5, 0.0, 0.0, -0.5, 0.5, 0.5, 1.0, 0.0,
-            -0.5, 0.5, -0.5, 1.0, 1.0, -0.5, -0.5, -0.5, 0.0, 1.0, -0.5, -0.5, -0.5, 0.0, 1.0,
-            -0.5, -0.5, 0.5, 0.0, 0.0, -0.5, 0.5, 0.5, 1.0, 0.0, 0.5, 0.5, 0.5, 1.0, 0.0, 0.5, 0.5,
-            -0.5, 1.0, 1.0, 0.5, -0.5, -0.5, 0.0, 1.0, 0.5, -0.5, -0.5, 0.0, 1.0, 0.5, -0.5, 0.5,
-            0.0, 0.0, 0.5, 0.5, 0.5, 1.0, 0.0, -0.5, -0.5, -0.5, 0.0, 1.0, 0.5, -0.5, -0.5, 1.0,
-            1.0, 0.5, -0.5, 0.5, 1.0, 0.0, 0.5, -0.5, 0.5, 1.0, 0.0, -0.5, -0.5, 0.5, 0.0, 0.0,
-            -0.5, -0.5, -0.5, 0.0, 1.0, -0.5, 0.5, -0.5, 0.0, 1.0, 0.5, 0.5, -0.5, 1.0, 1.0, 0.5,
-            0.5, 0.5, 1.0, 0.0, 0.5, 0.5, 0.5, 1.0, 0.0, -0.5, 0.5, 0.5, 0.0, 0.0, -0.5, 0.5, -0.5,
-            0.0, 1.0,
+            -0.5, -0.5, -0.5, 0.0, 1.0, 0.0, 0.0, -1.0, //
+            0.5, -0.5, -0.5, 1.0, 0.0, 0.0, 0.0, -1.0, //
+            0.5, 0.5, -0.5, 1.0, 1.0, 0.0, 0.0, -1.0, //
+            0.5, 0.5, -0.5, 1.0, 1.0, 0.0, 0.0, -1.0, //
+            -0.5, 0.5, -0.5, 0.0, 1.0, 0.0, 0.0, -1.0, //
+            -0.5, -0.5, -0.5, 0.0, 0.0, 0.0, 0.0, -1.0, //
+            //
+            -0.5, -0.5, 0.5, 0.0, 0.0, 0.0, 0.0, 1.0, //
+            0.5, -0.5, 0.5, 1.0, 0.0, 0.0, 0.0, 1.0, //
+            0.5, 0.5, 0.5, 1.0, 1.0, 0.0, 0.0, 1.0, //
+            0.5, 0.5, 0.5, 1.0, 1.0, 0.0, 0.0, 1.0, //
+            -0.5, 0.5, 0.5, 0.0, 1.0, 0.0, 0.0, 1.0, //
+            -0.5, -0.5, 0.5, 0.0, 0.0, 0.0, 0.0, 1.0, //
+            //
+            -0.5, 0.5, 0.5, 1.0, 0.0, -1.0, 0.0, 0.0, //
+            -0.5, 0.5, -0.5, 1.0, 1.0, -1.0, 0.0, 0.0, //
+            -0.5, -0.5, -0.5, 0.0, 1.0, -1.0, 0.0, 0.0, //
+            -0.5, -0.5, -0.5, 0.0, 1.0, -1.0, 0.0, 0.0, //
+            -0.5, -0.5, 0.5, 0.0, 0.0, -1.0, 0.0, 0.0, //
+            -0.5, 0.5, 0.5, 1.0, 0.0, -1.0, 0.0, 0.0, //
+            //
+            0.5, 0.5, 0.5, 1.0, 0.0, 1.0, 0.0, 0.0, //
+            0.5, 0.5, -0.5, 1.0, 1.0, 1.0, 0.0, 0.0, //
+            0.5, -0.5, -0.5, 0.0, 1.0, 1.0, 0.0, 0.0, //
+            0.5, -0.5, -0.5, 0.0, 1.0, 1.0, 0.0, 0.0, //
+            0.5, -0.5, 0.5, 0.0, 0.0, 1.0, 0.0, 0.0, //
+            0.5, 0.5, 0.5, 1.0, 0.0, 1.0, 0.0, 0.0, //
+            //
+            -0.5, -0.5, -0.5, 0.0, 1.0, 0.0, -1.0, 0.0, //
+            0.5, -0.5, -0.5, 1.0, 1.0, 0.0, -1.0, 0.0, //
+            0.5, -0.5, 0.5, 1.0, 0.0, 0.0, -1.0, 0.0, //
+            0.5, -0.5, 0.5, 1.0, 0.0, 0.0, -1.0, 0.0, //
+            -0.5, -0.5, 0.5, 0.0, 0.0, 0.0, -1.0, 0.0, //
+            -0.5, -0.5, -0.5, 0.0, 1.0, 0.0, -1.0, 0.0, //
+            //
+            -0.5, 0.5, -0.5, 0.0, 1.0, 0.0, 1.0, 0.0, //
+            0.5, 0.5, -0.5, 1.0, 1.0, 0.0, 1.0, 0.0, //
+            0.5, 0.5, 0.5, 1.0, 0.0, 0.0, 1.0, 0.0, //
+            0.5, 0.5, 0.5, 1.0, 0.0, 0.0, 1.0, 0.0, //
+            -0.5, 0.5, 0.5, 0.0, 0.0, 0.0, 1.0, 0.0, //
+            -0.5, 0.5, -0.5, 0.0, 1.0, 0.0, 1.0, 0.0,
         ],
     );
     let cube_pos = [
@@ -171,7 +200,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         (-1.3, 1.0, -1.5),
     ];
 
-    let stride = 5 * mem::size_of::<GLfloat>() as GLsizei;
+    let stride = 8 * mem::size_of::<GLfloat>() as GLsizei;
 
     let _pos_attrib = VertexAttrib::new(0, 3, gl::FLOAT, gl::FALSE, stride, ptr::null());
     let _tex_attrib = VertexAttrib::new(
@@ -182,11 +211,20 @@ fn main() -> Result<(), Box<dyn Error>> {
         stride,
         (3 * mem::size_of::<GLfloat>()) as *const c_void,
     );
+    let normal_attrib = VertexAttrib::new(
+        2,
+        3,
+        gl::FLOAT,
+        gl::FALSE,
+        stride,
+        (5 * mem::size_of::<GLfloat>()) as *const c_void,
+    );
 
     _vbo.unbind();
     _vao.unbind();
     _pos_attrib.disable();
     _tex_attrib.disable();
+    normal_attrib.disable();
     texture_gato.unbind();
     texture_pog.unbind();
     texture_gatorrito.unbind();
@@ -214,7 +252,15 @@ fn main() -> Result<(), Box<dyn Error>> {
         "resources/shaders/light.frag",
     );
 
-    let mut cube = Cube::new(None, None, None);
+    let light_pos = vector![2.5, 1.0, 2.0];
+    let mut light = Cube::new(
+        Some(
+            Matrix::translation((light_pos[0], light_pos[1], light_pos[2]))
+                * Matrix::scaling((0.2, 0.2, 0.2)),
+        ),
+        None,
+        None,
+    );
 
     let mut t;
     unsafe {
@@ -235,8 +281,10 @@ fn main() -> Result<(), Box<dyn Error>> {
             _vao.bind();
             shader_program.uniform_matrix_4fv("proj", &window.camera_handle().proj());
             shader_program.uniform_matrix_4fv("view", &window.camera_handle().view());
-            shader_program.uniform_4fv("color", vector![1.0, 0.5, 0.31, 1.0]);
-            shader_program.uniform_4fv("light_color", vector![1.0, 0.5, 0.31, 1.0]);
+            shader_program.uniform_3fv("color", &vector![1.0, 1.0, 1.0]);
+            shader_program.uniform_3fv("light_color", &vector![1.0, 1.0, 1.0]);
+            shader_program.uniform_3fv("light_pos", &light_pos);
+            shader_program.uniform_3fv("view_pos", &window.camera_handle().pos());
 
             cube_pos.iter().for_each(|pos| {
                 let m = Matrix::translation(*pos)
@@ -252,6 +300,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                      //))
                      ;
                 shader_program.uniform_matrix_4fv("model", &m);
+                shader_program.uniform_matrix_3fv("normal", &m.to_normal());
 
                 shader_program.uniform_2dtex("tex", &texture_gatorrito);
                 unsafe { gl::DrawArrays(gl::TRIANGLES, 0, 36) }
@@ -263,7 +312,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             _tex_attrib.disable();
         }
         println!("Draw cube");
-        cube.draw(window.camera_handle(), &mut light_shader);
+        light.draw(window.camera_handle(), &mut light_shader);
 
         {
             window.begin_ui();

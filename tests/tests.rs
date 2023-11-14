@@ -47,7 +47,7 @@ mod tests {
             assert_eq!(&a + &b, vector![2., 4., 6.]);
             assert_eq!(&a - &b, vector![0., 0., 0.]);
             assert_eq!(&a * &b, 14.);
-            assert_eq!(a.cross(&b), vector![12., 6., 4.]);
+            assert_eq!(a.cross(&b), vector![0., 0., 0.]);
         }
 
         #[test]
@@ -147,6 +147,13 @@ mod tests {
             assert_eq!(&m1 * &m2, result12);
             let result21 = matrix![[14., 32., 50.], [32., 77., 122.], [50., 122., 194.]];
             assert_eq!(&m2 * &m1, result21);
+        }
+
+        #[test]
+        fn inverse_mat() {
+            let m = matrix![[2.0, 1.0], [7.0, 4.0]];
+            let result = matrix![[4.0, -1.0], [-7.0, 2.0]];
+            assert_eq!(m.inverse(), result);
         }
     }
 }

@@ -1,5 +1,6 @@
 use std::ops::{self, AddAssign, DivAssign, MulAssign, SubAssign};
 use std::ops::{Index, IndexMut};
+use std::usize;
 
 use cgmath::num_traits::ToPrimitive;
 
@@ -51,7 +52,7 @@ impl Matrix {
         (0..self.rows).map(|i| self[i][j]).collect()
     }
 
-    fn is_square(&self) -> bool {
+    pub fn is_square(&self) -> bool {
         self.rows == self.cols
     }
 
@@ -116,15 +117,29 @@ impl Matrix {
         self.cols -= 1;
     }
 
-    pub fn minor(&self, i: usize, j: usize) -> f32 {
+    pub fn submatrix(&self, i: usize, j: usize) -> Self {
         let mut m = self.clone();
         m.remove_row(i);
         m.remove_col(j);
-        m.det()
+        m
+    }
+
+    pub fn minor(&self, i: usize, j: usize) -> f32 {
+        self.submatrix(i, j).det()
     }
 
     pub fn cofactor(&self, i: usize, j: usize) -> f32 {
         (-1_i32).pow((i + j) as u32 % 2) as f32 * self.minor(i, j)
+    }
+
+    pub fn comatrix(&self) -> Self {
+        Self {
+            data: (0..self.rows() * self.cols())
+                .map(|lin_i| self.cofactor(lin_i / self.rows(), lin_i % self.cols()))
+                .collect::<Vec<f32>>(),
+            rows: self.rows(),
+            cols: self.cols(),
+        }
     }
 
     pub fn det(&self) -> f32 {
@@ -136,6 +151,10 @@ impl Matrix {
                 .map(|j| self[0][j] * self.cofactor(0, j))
                 .sum()
         }
+    }
+
+    pub fn inverse(&self) -> Self {
+        self.comatrix().transpose() / self.det()
     }
 
     ///Takes a column matrix and turns it into a vector
@@ -285,6 +304,16 @@ impl Matrix {
 
     pub fn model_default() -> Self {
         Self::identity(4)
+    }
+
+    /// Returns the normal matrix from a model matrix.
+    pub fn to_normal(&self) -> Self {
+        assert!(self.is_square());
+        assert_eq!(self.rows(), 4);
+        let mut m = self.clone();
+        m.remove_row(3);
+        m.remove_col(3);
+        m.inverse().transpose()
     }
 
     pub fn projection_orthographic(

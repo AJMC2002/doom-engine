@@ -1,12 +1,31 @@
 #version 460 core
 out vec4 FragColor;
 
+in vec3 _frag_pos;
 in vec2 _tex_coords;
+in vec3 _normals;
 
 uniform sampler2D tex;
-uniform vec4 color;
-uniform vec4 light_color;
+uniform vec3 color;
+uniform vec3 light_color;
+uniform vec3 light_pos;
+uniform vec3 view_pos;
 
 void main() {
-   FragColor = mix(texture(tex, _tex_coords), color * light_color, 0.5);
+    float ambient_factor = 0.1;
+    vec3 ambient = ambient_factor * light_color;
+
+    vec3 norm = normalize(_normals);
+    vec3 light_dir = normalize(light_pos - _frag_pos);
+    float diff = max(dot(norm, light_dir), 0.0);
+    vec3 diffuse = diff * light_color;
+
+    float specular_factor = 0.5;
+    vec3 view_dir = normalize(view_pos - _frag_pos);
+    vec3 reflect_dir = reflect(-light_dir, norm);
+    float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 32);
+    vec3 specular = specular_factor * spec * light_color;
+
+    vec4 result = vec4((ambient + diffuse + specular) * color, 1.0);
+    FragColor = texture(tex, _tex_coords) * result;
 }

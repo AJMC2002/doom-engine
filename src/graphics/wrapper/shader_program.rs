@@ -81,7 +81,7 @@ impl ShaderProgram {
         }
     }
 
-    pub fn uniform_3fv(&mut self, name: &str, v: Vector) {
+    pub fn uniform_3fv(&mut self, name: &str, v: &Vector) {
         assert_eq!(v.len(), 3);
         unsafe {
             gl::Uniform3fv(self.get_location(name), 1, v.as_ptr());
@@ -94,7 +94,7 @@ impl ShaderProgram {
         }
     }
 
-    pub fn uniform_4fv(&mut self, name: &str, v: Vector) {
+    pub fn uniform_4fv(&mut self, name: &str, v: &Vector) {
         assert_eq!(v.len(), 4);
         unsafe {
             gl::Uniform4fv(self.get_location(name), 1, v.as_ptr());
@@ -102,12 +102,22 @@ impl ShaderProgram {
     }
 
     pub fn uniform_matrix_4fv(&mut self, name: &str, m: &Matrix) {
+        assert!(m.is_square());
         assert_eq!(m.rows(), 4);
-        assert_eq!(m.cols(), 4);
         unsafe {
             //Matrix is a row-major matrix type, therefore we need to use
             //transpose: gl::TRUE since OpenGL uses column-major matrices
             gl::UniformMatrix4fv(self.get_location(name), 1, gl::TRUE, m.as_ptr());
+        }
+    }
+
+    pub fn uniform_matrix_3fv(&mut self, name: &str, m: &Matrix) {
+        assert!(m.is_square());
+        assert_eq!(m.rows(), 3);
+        unsafe {
+            //Matrix is a row-major matrix type, therefore we need to use
+            //transpose: gl::TRUE since OpenGL uses column-major matrices
+            gl::UniformMatrix3fv(self.get_location(name), 1, gl::TRUE, m.as_ptr());
         }
     }
 
