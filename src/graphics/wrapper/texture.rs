@@ -1,6 +1,7 @@
 use gl::types::*;
 use image::GenericImageView;
 
+#[derive(Debug)]
 pub struct Texture2D {
     id: GLuint,
 }

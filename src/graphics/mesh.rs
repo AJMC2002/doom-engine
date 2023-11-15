@@ -1,8 +1,4 @@
-use std::{
-    mem::{self, size_of},
-    os::raw::c_void,
-    ptr,
-};
+use std::{mem::size_of, ptr};
 
 use gl::types::{GLfloat, GLsizei};
 use obj::Obj;
@@ -11,7 +7,7 @@ use crate::maths::{Matrix, Vector};
 
 use super::{
     camera::Camera,
-    wrapper::{shader_program, ShaderProgram, Texture2D, VertexAttrib, BO, EBO, VAO, VBO},
+    wrapper::{ShaderProgram, Texture2D, VertexAttrib, BO, EBO, VAO, VBO},
 };
 
 pub struct Cube<'a> {
@@ -42,21 +38,21 @@ impl<'a> Cube<'a> {
             -0.5, -0.5, -0.5, //7
         ];
 
-        match texture {
-            Some(texture) => {
-                let tex_coords = tex_coords.unwrap_or(vec![
-                    1.0, 1.0, //0
-                    0.0, 1.0, //1
-                    1.0, 0.0, //2
-                    0.0, 0.0, //3
-                    0.0, 1.0, //4
-                    1.0, 1.0, //5
-                    0.0, 0.0, //6
-                    1.0, 0.0, //7
-                ]);
-            }
-            None => (),
-        }
+        // match texture {
+        //     Some(texture) => {
+        //         let tex_coords = tex_coords.unwrap_or(vec![
+        //             1.0, 1.0, //0
+        //             0.0, 1.0, //1
+        //             1.0, 0.0, //2
+        //             0.0, 0.0, //3
+        //             0.0, 1.0, //4
+        //             1.0, 1.0, //5
+        //             0.0, 0.0, //6
+        //             1.0, 0.0, //7
+        //         ]);
+        //     }
+        //     None => (),
+        // }
 
         let vao = VAO::new();
         let vbo: VBO = BO::new(gl::STATIC_DRAW, vertex_data);
