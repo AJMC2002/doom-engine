@@ -23,7 +23,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let texture_gato = Texture2D::new("resources/textures/cat.jpg");
     let texture_gatorrito = Texture2D::new("resources/textures/gatorrito.jpg");
     let texture_pog = Texture2D::new("resources/textures/pog.jpg");
-    let mut textures = [&texture_gato, &texture_gatorrito, &texture_pog];
+    let textures = [&texture_gato, &texture_gatorrito, &texture_pog];
     let mut main_texture = 0;
 
     // All Buffer Objects are binded and the data is stored on creation
@@ -131,6 +131,16 @@ fn main() -> Result<(), Box<dyn Error>> {
         None,
     );
 
+    let mut light2 = Cube::new(
+        Some((
+            Matrix::translation(vector![-2.5, 1.0, 2.0]),
+            Matrix::identity(4),
+            Matrix::scaling(vector![0.2, 0.2, 0.2]),
+        )),
+        None,
+        None,
+    );
+
     unsafe {
         gl::ClearColor(154. / 258., 127. / 258., 174. / 258., 1.0);
     }
@@ -149,6 +159,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         shader_program.uniform_3fv("color", &vector![1.0, 1.0, 1.0]);
         shader_program.uniform_3fv("light_color", &vector![1.0, 1.0, 1.0]);
         shader_program.uniform_3fv("light_pos", &light.pos());
+        shader_program.uniform_3fv("light_pos2", &light2.pos());
         shader_program.uniform_3fv("view_pos", &window.camera_handle().pos());
 
         cube_pos.iter().for_each(|pos| {
@@ -177,6 +188,8 @@ fn main() -> Result<(), Box<dyn Error>> {
 
         println!("Draw cube");
         light.draw(window.camera_handle(), &mut light_shader);
+        light2.set_pos(vector!(-light.pos()[0], light.pos()[1], light.pos()[2]));
+        light2.draw(window.camera_handle(), &mut light_shader);
 
         window.begin_ui();
 
@@ -291,7 +304,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                     ui.vertical(|ui| {
                         ui.horizontal(|ui| {
                             ui.label("x");
-                            ui.add(egui::Slider::new(&mut light_pos[0], -15.0..=15.0));
+                            ui.add(egui::Slider::new(&mut light_pos[0], -100.0..=100.0));
                         });
                         ui.horizontal(|ui| {
                             ui.label("y");
